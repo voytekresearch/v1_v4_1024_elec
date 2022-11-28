@@ -17,7 +17,7 @@ from neurodsp.spectral import compute_spectrum
 FS = 500 # sampling frequency (Hz)
 N_ARRAYS = 16 # number of arrays
 N_CHANNELS = 64 # number of channels per array
-SESSIONS = ['A_SNR_140819']
+SESSIONS = ['-']
 
 # Settings
 PATH = 'G:/Shared drives/v1_v4_1024/'
@@ -79,6 +79,7 @@ def comp_session_psd(session):
     data_in = loadmat(PATH + f'data/{session}/lfp/NSP1_array1_LFP.mat')
     freq, _ = compute_spectrum(data_in['lfp'].T, FS, f_range=F_RANGE)
     psd = np.zeros([N_ARRAYS*N_CHANNELS, len(freq)]) # shape: n channels (1024) x n frequencies 
+    psd_array = np.zeros([N_ARRAYS, len(freq)]) #psd per array
 
     # loop through files
     idx_nsp = 1
@@ -86,7 +87,6 @@ def comp_session_psd(session):
         # display progress
         print('Computing PSD for session')
         print(f"Analyzing file#: \t{i_array}")
-\
 
         # import data
         fname_in = PATH + f'data/{session}/lfp/NSP{idx_nsp}_array{i_array}_LFP.mat'
@@ -95,13 +95,14 @@ def comp_session_psd(session):
         # compute power spectrum
         _, spectrum_i = compute_spectrum(data_in['lfp'].T, FS, f_range=F_RANGE) # here, we use '.T' to transpose the array so the first dimension is channels
         psd[(i_array-1)*N_CHANNELS:i_array*N_CHANNELS] = spectrum_i # save results of each file to a single variable
+        psd_array[(i_array-1)] = np.mean(spectrum_i, axis = 0)
 
         # increment
         if i_array % 2 == 0:
             idx_nsp += 1
 
     # save results
-    np.savez(PATH + f'/data/results/{session}_lfp_spectra', psd=psd, freq=freq) 
+    np.savez(PATH + f'/data/results/{session}_lfp_spectra', psd=psd, freq=freq, psd_array=psd_array) 
 
 
 if __name__ == "__main__":
