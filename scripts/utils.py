@@ -114,9 +114,6 @@ def epoch_nix(fname):
     signal_epoch: array
         Array of epochs of shape (trials x channels x time).
     """
-
-    # imports
-    from io import load_nix
     
     # Load nix
     segment, _ = load_nix(fname)
