@@ -7,6 +7,47 @@ Plotting functions
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def plot_psd_diff(freq, psd_diff):
+    """ 
+    Plot spectra (or change in spectral power) in semi-log space.
+    The mean spectrum is plotted in black, and the individual spectra are plotted in grey.
+    A horizontal line at power=0 is also plotted.
+
+    Parameters
+    ----------
+    freq : array
+        Frequency values.
+    psd_diff : array
+        Spectral power values.
+
+    Returns
+    -------
+    fig, ax : matplotlib figure and axes objects
+    
+    """
+
+    # plot psd
+    fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+    ax.plot(freq, psd_diff.T, color='grey')
+
+    # plot mean
+    ax.plot(freq, psd_diff.mean(axis=0), color='k', linewidth=3)
+
+    # label
+    ax.set_xlabel('Frequency (Hz)')
+    ax.set_ylabel('Power (uV^2/Hz)')
+    ax.set_title(f"Power spectrum difference")
+
+    # annotate power=0
+    ax.axhline(0, color='r', linestyle='--', linewidth=3)
+
+    # scale x-axis logarithmically
+    ax.set(xscale="log");
+
+    return fig, ax
+
+
 def plot_schematic(data, odml_path, fname_out=None):
     """
     Plot data from all electrodes in a schematic view.
@@ -14,6 +55,19 @@ def plot_schematic(data, odml_path, fname_out=None):
     Adapted from:
     https://gin.g-node.org/NIN/V1_V4_1024_electrode_resting_state_data/src/master/code/python_scripts/plotting/arrayplot_SNR.py 
 
+    Parameters
+    ----------
+    data : array
+        Data to plot.
+    odml_path : str
+        Path to odML file containing electrode metadata.
+    fname_out : str, optional
+        Path to save figure to. If None, figure is not saved.
+
+    Returns
+    -------
+    fig, ax : matplotlib figure and axes objects    
+    
     """
 
     # Imports
