@@ -6,13 +6,19 @@ Plotting functions
 # imports
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 
 
-def plot_psd_diff(freq, psd_diff):
+# Matplotlib params
+rcParams['savefig.dpi'] = 300
+rcParams['figure.facecolor'] = 'w'
+
+def plot_psd_diff(freq, psd_diff, fname_out=None):
     """ 
     Plot spectra (or change in spectral power) in semi-log space.
     The mean spectrum is plotted in black, and the individual spectra are plotted in grey.
-    A horizontal line at power=0 is also plotted.
+    A horizontal line at power=0 is also plotted. If fname_out is not None, the figure is 
+    saved to that path.
 
     Parameters
     ----------
@@ -20,12 +26,20 @@ def plot_psd_diff(freq, psd_diff):
         Frequency values.
     psd_diff : array
         Spectral power values.
+    fname_out : str, optional
+        Path to save figure to. If None, figure is not saved.
 
     Returns
     -------
     fig, ax : matplotlib figure and axes objects
     
     """
+
+   # Matplotlib params
+    rcParams['xtick.labelsize'] = 12
+    rcParams['ytick.labelsize'] = 12
+    rcParams['axes.labelsize'] = 14
+    rcParams['axes.titlesize'] = 16
 
     # plot psd
     fig, ax = plt.subplots(1, 1, figsize=(10, 5))
@@ -44,6 +58,10 @@ def plot_psd_diff(freq, psd_diff):
 
     # scale x-axis logarithmically
     ax.set(xscale="log");
+
+    # Savefig
+    if not fname_out is None:
+        plt.savefig(fname_out, transparent=False)
 
     return fig, ax
 
@@ -72,12 +90,9 @@ def plot_schematic(data, odml_path, fname_out=None):
 
     # Imports
     import odml
-    from matplotlib import rcParams
     from matplotlib.patches import Rectangle
     from matplotlib.colors import LogNorm, ListedColormap
     from matplotlib.collections import PatchCollection
-    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-    from matplotlib.ticker import LogFormatter
     from scipy.interpolate import interp1d
 
     # Load metadata
@@ -95,20 +110,6 @@ def plot_schematic(data, odml_path, fname_out=None):
 
     # Get SNR threshold
     SNR_thresh = metadata['Recording'].properties['SNR_threshold'].values[0]
-
-    # Matplotlib params
-    rcParams['xtick.labelsize'] = 7
-    rcParams['ytick.labelsize'] = 7
-    rcParams['axes.labelsize'] = 7
-    rcParams['font.sans-serif'] = "Arial"
-    rcParams['font.family'] = "sans-serif"
-    rcParams['xtick.major.size'] = 2
-    rcParams['xtick.major.width'] = 0.5
-    rcParams['ytick.major.size'] = 2
-    rcParams['ytick.major.width'] = 0.5
-    rcParams['xtick.major.pad'] = '2'
-    rcParams['ytick.major.pad'] = '2'
-    rcParams['axes.linewidth'] = 0.5
 
     # Create figure and axes
     fig, ax = plt.subplots(figsize=(12, 6))
@@ -162,6 +163,6 @@ def plot_schematic(data, odml_path, fname_out=None):
     # Savefig
     plt.tight_layout()
     if not fname_out is None:
-        plt.savefig(fname_out, dpi=600, transparent=True)
+        plt.savefig(fname_out, transparent=False)
 
     return fig, ax
