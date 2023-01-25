@@ -1,0 +1,153 @@
+{
+    "__default__": {
+        "time":"24:00:00",
+        "n":1,
+        "nCPUs":1,
+        "mem":"4G",
+        "name":"{rule}"
+      },
+
+      "metadata_setup": {
+        "time":"00:05:00",
+        "n":1,
+        "nCPUs":1,
+        "mem":"1G",
+	      "name":"{wildcards.monkey}.{rule}"
+      },
+
+      "metadata_recording": {
+        "time":"00:05:00",
+        "n":1,
+        "nCPUs":1,
+        "mem":"1G",
+	      "name":"{wildcards.ses}.{rule}"
+      },
+
+      "metadata_SNR_RF": {
+        "time":"00:05:00",
+        "n":1,
+        "nCPUs":1,
+        "mem":"1G",
+	      "name":"{wildcards.ses}.{rule}"
+      },
+
+      "LFP": {
+        "time":"6:00:00",
+        "n":1,
+        "nCPUs":8,
+        "mem":"{resources.mem_mb}",
+        "name":"{wildcards.arr}.LFP.{wildcards.exp}.{wildcards.ses}"
+      },
+
+      "MUAe": {
+        "time":"6:00:00",
+        "n":1,
+        "mem":"{resources.mem_mb}",
+        "nCPUs":8,
+        "name":"{wildcards.arr}.MUAe.{wildcards.exp}.{wildcards.ses}"
+      },
+
+      "LFP_RS": {
+        "time":"6:00:00",
+        "n":1,
+        "nCPUs":8,
+        "mem":"{resources.mem_mb}",
+        "name":"{wildcards.arr}.LFP.{wildcards.exp}.{wildcards.ses}"
+      },
+
+      "MUAe_RS": {
+        "time":"6:00:00",
+        "n":1,
+        "mem":"{resources.mem_mb}",
+        "nCPUs":8,
+        "name":"{wildcards.arr}.MUAe.{wildcards.exp}.{wildcards.ses}"
+      },
+
+      "receptive_fields":{
+        "time":"2:00:00",
+        "n":1,
+        "mem":"{resources.mem_mb}",
+        "nCPUs":1,
+        "name":"RF.{wildcards.arr}"
+      },
+
+      "signal_to_noise_ratio_of_channel":{
+        "time":"2:00:00",
+        "n":1,
+        "mem":"{resources.mem_mb}M",
+        "nCPUs":1,
+        "name":"{wildcards.arr}.SNR.{wildcards.ses}"
+      },
+
+      "merge_SNR":{
+        "time":"0:01:00",
+        "n":1,
+        "mem":"2G",
+        "nCPUs":1,
+        "name":"merge_SNR.{wildcards.ses}"
+      },
+
+      "filter_hi":{
+        "time":"10:00:00",
+        "n":1,
+        "mem":"110G",
+        "nCPUs":8,
+        "name":"hi_pass.{wildcards.ses}"
+      },
+
+      "threshold_crossings":{
+        "time":"10:00:00",
+        "n":1,
+        "mem":"245G",
+        "nCPUs":64,
+        "name":"thr_cross_mpi.{wildcards.ses}"
+      },
+
+      "count_synchrofacts":{
+        "time":"5:00:00",
+        "n":1,
+        "mem":"{resources.mem_mb}M",
+        "nCPUs":"{resources.cpus}",
+        "name":"syncount.{wildcards.ses}"
+      },
+
+      "remove_synchrofact_electrodes":{
+        "time":"10:00:00",
+        "n":1,
+        "mem":"{resources.mem_mb}M",
+        "nCPUs":"{resources.cpus}",
+        "name":"removal.{wildcards.ses}"
+      },
+
+      "plot_SNR":{
+        "time":"0:01:00",
+        "n":1,
+        "mem":"4G",
+        "nCPUs":1,
+        "name":"plt_SNR.{wildcards.ses}"
+      },
+
+      "plot_response_timing":{
+        "time":"0:01:00",
+        "n":1,
+        "mem":"4G",
+        "nCPUs":1,
+        "name":"plt_timing.{wildcards.ses}"
+      },
+
+      "eye_signals":{
+        "time":"1:30:00",
+        "n":1,
+        "mem":"32G",
+        "nCPUs":8,
+        "name":"eye.{wildcards.ses}"
+      },
+
+      "plot_eyes":{
+        "time":"0:30:00",
+        "n":1,
+        "mem":"16G",
+        "nCPUs":2,
+        "name":"plt_eye.{wildcards.ses}"
+      }
+}

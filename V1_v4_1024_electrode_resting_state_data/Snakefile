@@ -1,0 +1,965 @@
+from os.path import join, getsize
+import math
+
+configfile: 'configfile.yaml'
+localrules: amsterdam_all, workflow_diagrams
+
+SOURCE = config['sourcedir']
+CODE_DIR = config['codedir']
+METADATA_DIR = config['metadatadir']
+LOG_DIR = config['logdir']  # This is used in the job submission
+SESSIONS = config['sessions']
+SAMPLES = config['sample_sessions']
+NSPCOUNT = config['nsp_count']
+SNR_THRESHOLD = config["SNR_threshold"]
+RF_SESSIONS = {'L': ['RF_260617', 'RF_280617'],
+               'A': ['RF_290818',  'RF_280818']}
+
+"""
+Set of functions used to find the path to all the files in the workflow
+"""
+
+
+def target_arrays(wcs):
+    files = []
+    for session in SESSIONS:
+        path = join(SOURCE, 'data', session, 'anasig_placeholder')
+        for nsp_id in range(1, NSPCOUNT + 1):
+            nsp = join(path, 'NSP' + str(nsp_id) + '_array')
+            arr1 = nsp + str(2*nsp_id-1)
+            arr2 = nsp + str(2*nsp_id)
+            files.append(arr1)
+            files.append(arr2)
+    return files
+
+
+def target_LFP(wcs):
+    arrayfiles = target_arrays(wcs)
+    files = [file.replace('anasig_placeholder', 'LFP') + '_LFP.nix'
+             for file in arrayfiles]
+    return files
+
+
+def target_MUAe(wcs):
+    arrayfiles = target_arrays(wcs)
+    files = [file.replace('anasig_placeholder', 'MUAe') + '_MUAe.nix'
+             for file in arrayfiles]
+    return files
+
+
+def target_arrayplots(wcs):
+    files = []
+    for ses in SESSIONS:
+        if 'SNR' in ses:
+            pdf_SNR = join(METADATA_DIR,
+                           'signal_to_noise_ratio',
+                           ses + '_arrayplot.pdf')
+            files.append(pdf_SNR)
+            pdf_response_timing = join(METADATA_DIR,
+                                       'stimulus_evoked_response_timing',
+                                       ses + '_response_timing_arrayplot.pdf')
+            files.append(pdf_response_timing)
+
+    return files
+
+
+def get_sample_session(wcs):
+    subject = wcs.monkey + '_'
+    for session in SAMPLES:
+        if subject in session:
+            path = join(SOURCE,
+                        'data',
+                        session,
+                        'raw',
+                        'NSP1_aligned.ns6')
+    return path
+
+
+def get_ns6_nsp_from_arr(wcs):
+    ns6 = join(SOURCE,
+               'data',
+               wcs.monkey + '_' + wcs.exp + '_' + wcs.ses,
+               'raw',
+               'NSP' + str(math.ceil(float(wcs.arr)/2)) + '_aligned.ns6')
+    return ns6
+
+
+def get_SNR_csv(wcs):
+    files = []
+    for nsp_id in range(1, NSPCOUNT + 1):
+        arr1 = str(2*nsp_id-1)
+        arr2 = str(2*nsp_id)
+        base = join(SOURCE,
+                    'tmp',
+                    'signal_to_noise_ratio',
+                    wcs.monkey + '_SNR_' + wcs.ses,
+                    'NSP' + str(nsp_id) + '_array')
+        path1 = base + arr1 + '_SNR.csv'
+        path2 = base + arr2 + '_SNR.csv'
+        files.append(path1)
+        files.append(path2)
+    return files
+
+
+def get_RF_csv(wcs):
+    files = []
+    for nsp_id in range(1, NSPCOUNT + 1):
+        arr1 = str(2*nsp_id-1)
+        arr2 = str(2*nsp_id)
+        base = join(SOURCE,
+                    'tmp',
+                    'receptive_fields',
+                    wcs.monkey + '_RF_' + wcs.ses,
+                    'NSP' + str(nsp_id) + '_array')
+        path1 = base + arr1 + '_RF.csv'
+        path2 = base + arr2 + '_RF.csv'
+        files.append(path1)
+        files.append(path2)
+    return files
+
+
+def get_RFs_of_monkey(wcs):
+    files = []
+    for ses in RF_SESSIONS[wcs.monkey]:
+        file = join(SOURCE,
+                    'tmp',
+                    'receptive_fields',
+                    wcs.monkey + '_' + ses + '_full.csv')
+        files.append(file)
+    return files
+
+
+def target_eyeplot(wcs):
+    files = []
+    for ses in SESSIONS:
+        if 'RS' in ses:
+            file = join(METADATA_DIR,
+                        'eye_signals',
+                        f'{ses}_eyes.pdf')
+            files.append(file)
+    return files
+
+
+def target_metadata(wcs):
+    files = []
+    for ses in SESSIONS:
+        file = join(SOURCE, 'data', ses, 'metadata_' + ses + '.odml')
+        files.append(file)
+    return files
+
+
+def target_RF_metadata(wcs):
+    files = []
+    for ses in SESSIONS:
+        if 'RF' in ses:
+            file = join(SOURCE, 'data', ses, 'metadata_' + ses + '.odml')
+            files.append(file)
+    return files
+
+
+def target_synchrofacts(wcs):
+    files = []
+    for ses in SESSIONS:
+        if 'RS' in ses:
+            for i in range(1, NSPCOUNT + 1):
+                out = join(SOURCE, 'tmp', ses, 'thr_crossings',
+                           'thr_crossings_nsp' + str(i) + '.pkl')
+                files.append(out)
+            counts = join(SOURCE,
+                          'tmp',
+                          ses,
+                          'synchrofacts',
+                          f'{ses}_tot_syncounts.npy')
+            files.append(counts)
+            counts = join(SOURCE,
+                          'tmp',
+                          ses,
+                          'synchrofacts',
+                          f'{ses}_el_syncounts.npy')
+            files.append(counts)
+            metadata = join(METADATA_DIR,
+                            'cross_talk_removal',
+                            f'{ses}_removal_metadata.csv')
+            files.append(metadata)
+    return files
+
+
+def mem_lim_synchrofacts(wcs):
+    if wcs.monkey == 'L':
+        return 110*1024
+    if wcs.monkey == 'A':
+        return 110*1024
+
+
+def cpus_synchrofacts(wcs):
+    if wcs.monkey == 'L':
+        return 48
+    if wcs.monkey == 'A':
+        return 48
+
+
+def sample_MUAe_array_for_eyeplot(wcs):
+    if wcs.monkey =='L':
+        muae = join(SOURCE,
+                    'data',
+                    f'{wcs.monkey}_RS_{wcs.ses}',
+                    'MUAe',
+                    'NSP6_array11_MUAe.nix')
+    elif wcs.monkey == 'A':
+        muae = join(SOURCE,
+                    'data',
+                    f'{wcs.monkey}_RS_{wcs.ses}',
+                    'MUAe',
+                    'NSP5_array10_MUAe.nix')
+    return muae
+
+
+'''
+DEFINE OBJECTIVES
+'''
+
+rule amsterdam_all:
+    input:
+        rfs = target_RF_metadata,
+        crossings = target_synchrofacts,
+        lfp = target_LFP,
+        muae = target_MUAe,
+        pdf_SNR = target_arrayplots,
+        png_eyes = target_eyeplot,
+        metadata = target_metadata,
+        rulegraph_pdf = join(CODE_DIR, 'rulegraph.png')
+
+'''
+METADATA HANDLING
+'''
+
+rule metadata_setup:
+    input:
+        # xls files to create initial odml files with odmltables
+        equipment = join(METADATA_DIR,
+                         'experimental_setup',
+                         'equipment_specifications.xls'),
+        subject = join(METADATA_DIR,
+                       'subjects',
+                       'subject_{monkey}.xls'),
+
+        # metadata files that need to be integrated in the odml structure
+        impedances = join(METADATA_DIR,
+                          'experimental_setup',
+                          'impedance_{monkey}'),
+        id_map = join(METADATA_DIR,
+                      'experimental_setup',
+                      'channel_area_mapping_{monkey}.mat'),
+        sample_session = get_sample_session,
+
+        # Array and electrode approximate positions
+        array_pos = join(METADATA_DIR,
+                         'experimental_setup',
+                         'approximate_array_positions_{monkey}.csv'),
+        elec_pos = join(METADATA_DIR,
+                        'experimental_setup',
+                        'elec_position_in_array.csv'),
+
+        # Scripts that will be needed
+        script_odmltables = join(CODE_DIR,
+                                 'metadata_handling',
+                                 'initialize_odml_from_xls.py'),
+        script_enrich = join(CODE_DIR,
+                             'metadata_handling',
+                             'enrich_odml_IDs.py')
+    output:
+        tmp_odml = join(SOURCE,
+                        'tmp',
+                        'metadata',
+                        'basic_{monkey}_template.odml'),
+        odml = join(SOURCE,
+                    'tmp',
+                    'metadata',
+                    'subject_{monkey}_template.odml')
+    wildcard_constraints:
+        monkey = 'L|A'
+    conda:
+        join(CODE_DIR, 'environment.yaml')
+    shell:
+        """
+            python {input.script_odmltables} --equipment {input.equipment} \
+                                             --subject {input.subject} \
+                                             --out {output.tmp_odml}
+
+            python {input.script_enrich} --odml-template {output.tmp_odml} \
+                                         --impedance {input.impedances} \
+                                         --id-map {input.id_map} \
+                                         --ns6 {input.sample_session} \
+                                         --array-pos {input.array_pos} \
+                                         --elec-pos {input.elec_pos} \
+                                         --out {output.odml}
+        """
+
+rule eye_signals:
+    input:
+        session = join(SOURCE,
+                       'data',
+                       '{monkey}_RS_{ses}',
+                       'raw',
+                       'NSP1_aligned.ns6'),
+        mat = join(SOURCE,
+                   'data',
+                   '{monkey}_RS_{ses}',
+                   'eye_signals',
+                   'aligned_eye_data.mat'),
+        odml_template = rules.metadata_setup.output.odml,
+        # Scripts
+        nix_script = join(CODE_DIR,
+                          'metadata_handling',
+                          'eyesig_conversion_and_epochs.py'),
+        trials_script = join(CODE_DIR,
+                             'metadata_handling',
+                             'enrich_odml_epochs.py')
+    output:
+        nix = join(SOURCE,
+                   'data',
+                   '{monkey}_RS_{ses}',
+                   'eye_signals',
+                   '{monkey}_RS_{ses}_aligned_eye_data.nix'),
+        csv = join(METADATA_DIR,
+                   'epochs',
+                   'epochs_{monkey}_RS_{ses}.csv'),
+        odml = join(SOURCE,
+                    'tmp',
+                    'metadata',
+                    'partial_{monkey}_RS_{ses}_with_epochs.odml')
+    conda:
+        join(CODE_DIR, 'environment.yaml')
+    shell:
+        """
+            python {input.nix_script} --eyesig {input.mat} \
+                                      --csv {output.csv} \
+                                      --out {output.nix}
+            python {input.trials_script} --template {input.odml_template} \
+                                         --csv {output.csv} \
+                                         --SNR-thresh {SNR_THRESHOLD} \
+                                         --ns6 {input.session} \
+                                         --out {output.odml}
+        """
+
+rule metadata_recording:
+    input:
+        session = join(SOURCE,
+                       'data',
+                       '{monkey}_{exp}_{ses}',
+                       'raw',
+                       'NSP1_aligned.ns6'),
+        odml_template = rules.metadata_setup.output.odml,
+
+        # Scripts
+        csv_script = join(CODE_DIR,
+                          'metadata_handling',
+                          'generate_trial_csv.py'),
+        trials_script = join(CODE_DIR,
+                             'metadata_handling',
+                             'enrich_odml_epochs.py')
+    output:
+        csv = join(METADATA_DIR,
+                   'epochs',
+                   'epochs_{monkey}_{exp}_{ses}.csv'),
+        odml = join(SOURCE,
+                    'tmp',
+                    'metadata',
+                    'partial_{monkey}_{exp}_{ses}_with_epochs.odml')
+    conda:
+        join(CODE_DIR, 'environment.yaml')
+    wildcard_constraints:
+        exp = 'SNR|RF'
+    shell:
+        """
+            python {input.csv_script} --ns6 {input.session} \
+                                      --out {output.csv}
+            python {input.trials_script} --template {input.odml_template} \
+                                         --csv {output.csv} \
+                                         --SNR-thresh {SNR_THRESHOLD} \
+                                         --ns6 {input.session} \
+                                         --out {output.odml}
+        """
+
+rule metadata_SNR:
+    input:
+        csv_SNR = join(METADATA_DIR,
+                       'signal_to_noise_ratio',
+                       '{monkey}_SNR_{ses}_full.csv'),
+        odml_template = join(SOURCE,
+                             'tmp',
+                             'metadata',
+                             'partial_{monkey}_SNR_{ses}_with_epochs.odml'),
+        script = join(CODE_DIR,
+                      'metadata_handling',
+                      'finalize_odml_SNR.py')
+    output:
+        odml = join(SOURCE,
+                    'data',
+                    '{monkey}_SNR_{ses}',
+                    'metadata_{monkey}_SNR_{ses}.odml')
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    shell:
+        """
+            python {input.script} --csv-SNR {input.csv_SNR} \
+                                  --odml {input.odml_template} \
+                                  --out {output.odml}
+        """
+
+rule metadata_RF:
+    input:
+        csv_RF = join(METADATA_DIR,
+                      'receptive_fields',
+                      'combined_{monkey}_RF.csv'),
+        odml_template = join(SOURCE,
+                             'tmp',
+                             'metadata',
+                             'partial_{monkey}_RF_{ses}_with_epochs.odml'),
+        script = join(CODE_DIR,
+                      'metadata_handling',
+                      'finalize_odml_RF.py')
+    output:
+        odml = join(SOURCE,
+                    'data',
+                    '{monkey}_RF_{ses}',
+                    'metadata_{monkey}_RF_{ses}.odml')
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    shell:
+        """
+            python {input.script} --csv-RF {input.csv_RF} \
+                                  --odml {input.odml_template} \
+                                  --out {output.odml}
+        """
+
+rule metadata_RS:
+    input:
+        csv_RF = join(METADATA_DIR,
+                      'receptive_fields',
+                      'combined_{monkey}_RF.csv'),
+        csv_SNR = join(METADATA_DIR,
+                       'signal_to_noise_ratio',
+                       '{monkey}_SNR_{ses}_full.csv'),
+        csv_sync = join(METADATA_DIR,
+                        'cross_talk_removal',
+                        '{monkey}_RS_{ses}_removal_metadata.csv'),
+        odml_template = join(SOURCE,
+                             'tmp',
+                             'metadata',
+                             'partial_{monkey}_RS_{ses}_with_epochs.odml'),
+        script = join(CODE_DIR,
+                      'metadata_handling',
+                      'finalize_odml_RS.py')
+    output:
+        odml = join(SOURCE,
+                    'data',
+                    '{monkey}_RS_{ses}',
+                    'metadata_{monkey}_RS_{ses}.odml')
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    shell:
+        """
+            python {input.script} --csv-RF {input.csv_RF} \
+                                  --csv-SNR {input.csv_SNR} \
+                                  --csv-sync {input.csv_sync} \
+                                  --odml {input.odml_template} \
+                                  --out {output.odml}
+        """
+
+
+'''
+ANALOG SIGNALS
+'''
+
+rule LFP:
+    input:
+        ns6 = get_ns6_nsp_from_arr,
+        odml = rules.metadata_recording.output.odml,
+        script = join(CODE_DIR,
+                      'signal_processing',
+                      'calculate_LFP.py')
+    output:
+        lfp = join(SOURCE,
+                   'data',
+                   '{monkey}_{exp}_{ses}',
+                   'LFP',
+                   'NSP{nsp}_array{arr}_LFP.nix')
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    wildcard_constraints:
+        exp = 'SNR|RF'
+    resources:
+        mem_mb = lambda wcs, input: int(2*getsize(input.ns6)/1024/1024)  # MB
+    shell:
+        '''
+        python {input.script} --ns6 {input.ns6} \
+                              --array {wildcards.arr} \
+                              --odml {input.odml} \
+                              --out {output.lfp}
+        '''
+
+rule LFP_RS:
+    input:
+        ns6 = get_ns6_nsp_from_arr,
+        odml = rules.metadata_RS.output.odml,
+        eye = rules.eye_signals.output.nix,
+        script = join(CODE_DIR,
+                      'signal_processing',
+                      'calculate_LFP.py')
+    output:
+        lfp = join(SOURCE,
+                   'data',
+                   '{monkey}_{exp}_{ses}',
+                   'LFP',
+                   'NSP{nsp}_array{arr}_LFP.nix')
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    wildcard_constraints:
+        exp = 'RS'
+    resources:
+        mem_mb = lambda wcs, input: int(2*getsize(input.ns6)/1024/1024)  # MB
+    shell:
+        '''
+        python {input.script} --ns6 {input.ns6} \
+                              --array {wildcards.arr} \
+                              --odml {input.odml} \
+                              --eyesig {input.eye} \
+                              --out {output.lfp}
+        '''
+
+rule MUAe:
+    input:
+        ns6 = get_ns6_nsp_from_arr,
+        odml = rules.metadata_recording.output.odml,
+        script = join(CODE_DIR,
+                      'signal_processing',
+                      'calculate_MUAe.py')
+    output:
+        muae = join(SOURCE,
+                    'data',
+                    '{monkey}_{exp}_{ses}',
+                    'MUAe',
+                    'NSP{nsp}_array{arr}_MUAe.nix'
+                    )
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    wildcard_constraints:
+        exp = 'SNR|RF'
+    resources:
+        mem_mb = lambda wcs, input: int(3*getsize(input.ns6)/1024/1024)  # MB
+    shell:
+        '''
+        python {input.script} --ns6 {input.ns6} \
+                              --array {wildcards.arr} \
+                              --odml {input.odml} \
+                              --out {output.muae}
+        '''
+
+rule MUAe_RS:
+    input:
+        ns6 = get_ns6_nsp_from_arr,
+        odml = rules.metadata_RS.output.odml,
+        eye = rules.eye_signals.output.nix,
+        script = join(CODE_DIR,
+                      'signal_processing',
+                      'calculate_MUAe.py')
+    output:
+        muae = join(SOURCE,
+                    'data',
+                    '{monkey}_{exp}_{ses}',
+                    'MUAe',
+                    'NSP{nsp}_array{arr}_MUAe.nix'
+                    )
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    wildcard_constraints:
+        exp = 'RS'
+    resources:
+        mem_mb = lambda wcs, input: int(3*getsize(input.ns6)/1024/1024)  # MB
+    shell:
+        '''
+        python {input.script} --ns6 {input.ns6} \
+                              --array {wildcards.arr} \
+                              --odml {input.odml} \
+                              --eyesig {input.eye} \
+                              --out {output.muae}
+        '''
+
+
+'''
+METADATA GENERATION
+'''
+
+rule receptive_fields:
+    input:
+        muae = rules.MUAe.output.muae,
+        odml = rules.metadata_recording.output.odml,
+        RF_script = join(CODE_DIR,
+                         'signal_processing',
+                         'calculate_RF.py')
+    output:
+        csv = join(SOURCE,
+                   'tmp',
+                   'receptive_fields',
+                   '{monkey}_{exp}_{ses}',
+                   'NSP{nsp}_array{arr}_RF.csv')
+    params:
+        plt_path = join(METADATA_DIR,
+                        'receptive_fields',
+                        '{monkey}_{exp}_{ses}',
+                        'response_plot_NSP{nsp}_array{arr}_RF')
+    resources:
+        mem_mb = lambda wcs, input: 8*int(getsize(input.muae)/1024/1024)  # MB
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    wildcard_constraints:
+        exp = 'RF'
+    shell:
+        """
+            python {input.RF_script} --muae {input.muae} \
+                                     --odml {input.odml} \
+                                     --plt {params.plt_path} \
+                                     --out {output.csv}
+        """
+
+rule signal_to_noise_ratio_of_channel:
+    input:
+        muae = rules.MUAe.output.muae,
+        odml = rules.metadata_recording.output.odml,
+        SNR_script = join(CODE_DIR,
+                          'signal_processing',
+                          'calculate_SNR.py')
+    output:
+        csv = join(SOURCE,
+                   'tmp',
+                   'signal_to_noise_ratio',
+                   '{monkey}_{exp}_{ses}',
+                   'NSP{nsp}_array{arr}_SNR.csv'),
+        plt_path = join(METADATA_DIR,
+                        'signal_to_noise_ratio',
+                        '{monkey}_{exp}_{ses}',
+                        'response_plot_NSP{nsp}_array{arr}_SNR.png')
+    wildcard_constraints:
+        exp = 'SNR'
+    resources:
+        mem_mb = lambda wcs, input: 16*int(getsize(input.muae)/1024/1024)  # MB
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    shell:
+        """
+            python {input.SNR_script} --muae {input.muae} \
+                                      --odml {input.odml} \
+                                      --plt {output.plt_path} \
+                                      --out {output.csv}
+        """
+
+rule merge_SNR:
+    input:
+        SNR = get_SNR_csv,
+        script = join(CODE_DIR,
+                      'metadata_handling',
+                      'merge_csv.py')
+    output:
+        csv = join(METADATA_DIR,
+                   'signal_to_noise_ratio',
+                   '{monkey}_SNR_{ses}_full.csv')
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    shell:
+        """
+            python {input.script} --csv-list "{input.SNR}" \
+                                  --out {output.csv}
+        """
+
+rule merge_RF:
+    input:
+        RF = get_RF_csv,
+        script = join(CODE_DIR,
+                      'metadata_handling',
+                      'merge_csv.py')
+    output:
+        csv = join(SOURCE,
+                   'tmp',
+                   'receptive_fields',
+                   '{monkey}_RF_{ses}_full.csv')
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    shell:
+        """
+            python {input.script} --csv-list "{input.RF}" \
+                                  --out {output.csv}
+        """
+
+rule combine_RF_and_plot:
+    input:
+        RF = get_RFs_of_monkey,
+        mapping = join(METADATA_DIR,
+                       'experimental_setup',
+                       'channel_area_mapping_{monkey}.csv'),
+        script = join(CODE_DIR,
+                      'metadata_handling',
+                      'combine_RF.py')
+    output:
+        plt = join(METADATA_DIR,
+                   'receptive_fields',
+                   'combined_{monkey}_RF.pdf'),
+        csv = join(METADATA_DIR,
+                   'receptive_fields',
+                   'combined_{monkey}_RF.csv')
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    shell:
+        """
+            str="{input.RF}"
+            str="${{str// /;}}"
+            python {input.script} --csv-list $str \
+                                  --mapping {input.mapping} \
+                                  --plt {output.plt} \
+                                  --monkey {wildcards.monkey} \
+                                  --out {output.csv}
+        """
+
+'''
+SYNCHROFACTS
+'''
+
+rule filter_hi:
+    input:
+        ns6 = join(SOURCE,
+                   'data',
+                   '{monkey}_{exp}_{ses}',
+                   'raw',
+                   'NSP{nsp}_aligned.ns6'),
+        npy_script = join(CODE_DIR,
+                          'signal_processing',
+                          'highpass_ns6.py'),
+    output:
+        npy = join(SOURCE,
+                   'tmp',
+                   'thr_crossings',
+                   '{monkey}_{exp}_{ses}_hipass_nsp{nsp}.npy')
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    shell:
+        """
+            python {input.npy_script} --ns6 {input.ns6} \
+                                      --out {output.npy}
+        """
+
+rule threshold_crossings:
+    input:
+        npy = rules.filter_hi.output.npy,
+        ns6 = join(SOURCE,
+                   'data',
+                   '{monkey}_{exp}_{ses}',
+                   'raw',
+                   'NSP{nsp}_aligned.ns6'),
+        script = join(CODE_DIR,
+                      'synchrofacts',
+                      'get_thr_crossings.py')
+    output:
+        eigval = join(SOURCE,
+                      'tmp',
+                      'thr_crossings',
+                      '{monkey}_{exp}_{ses}_eigval_nsp{nsp}.npy'),
+        eigvec = join(SOURCE,
+                      'tmp',
+                      'thr_crossings',
+                      '{monkey}_{exp}_{ses}_eigvec_nsp{nsp}.npy'),
+        npy_pca = join(SOURCE,
+                       'tmp',
+                       'thr_crossings',
+                       '{monkey}_{exp}_{ses}_clean_hipass_nsp{nsp}.npy'),
+        out = join(SOURCE,
+                   'tmp',
+                   '{monkey}_{exp}_{ses}',
+                   'thr_crossings',
+                   'thr_crossings_nsp{nsp}.pkl'),
+    shell:
+        """
+           python {input.script} {input.npy} \
+                                 {output.eigval} \
+                                 {output.eigvec} \
+                                 {output.npy_pca} \
+                                 {input.ns6} \
+                                 {output.out}
+        """
+
+rule count_synchrofacts:
+    input:
+        pkl = expand(join(SOURCE, 'tmp', '{{monkey}}_RS_{{ses}}',
+                          'thr_crossings', 'thr_crossings_nsp{nsp}.pkl'),
+                     nsp=range(1, 9)),
+        script = join(CODE_DIR,
+                      'synchrofacts',
+                      'count_synchrofacts.py'),
+        odml = rules.metadata_SNR.output.odml
+    output:
+        lowSNR = join(SOURCE,
+                      'tmp',
+                      '{monkey}_RS_{ses}',
+                      'synchrofacts',
+                      'low_SNR.txt'),
+        lowFR = join(SOURCE,
+                     'tmp',
+                     '{monkey}_RS_{ses}',
+                     'synchrofacts',
+                     'low_FR.txt'),
+        counts_tot = join(SOURCE,
+                          'tmp',
+                          '{monkey}_RS_{ses}',
+                          'synchrofacts',
+                          '{monkey}_RS_{ses}_tot_syncounts.npy'),
+        counts_el = join(SOURCE,
+                         'tmp',
+                         '{monkey}_RS_{ses}',
+                         'synchrofacts',
+                         '{monkey}_RS_{ses}_el_syncounts.npy'),
+        surrs_tot = join(SOURCE,
+                         'tmp',
+                         '{monkey}_RS_{ses}',
+                         'synchrofacts',
+                         '{monkey}_RS_{ses}_surr_tot_syncounts.npy'),
+        surrs_el = join(SOURCE,
+                        'tmp',
+                        '{monkey}_RS_{ses}',
+                        'synchrofacts',
+                        '{monkey}_RS_{ses}_surr_el_syncounts.npy'),
+        epoch = join(SOURCE,
+                     'tmp',
+                     '{monkey}_RS_{ses}',
+                     'synchrofacts',
+                     '{monkey}_RS_{ses}_synobj.pkl')
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    resources:
+        mem_mb = mem_lim_synchrofacts,  # MB
+        cpus = cpus_synchrofacts
+    shell:
+        """
+            str="{input.pkl}"
+            str="${{str// /;}}"
+            python {input.script} --crossings $str \
+                                  --odml {input.odml} \
+                                  --lowSNR {output.lowSNR} \
+                                  --lowFR {output.lowFR} \
+                                  --outcountstot {output.counts_tot} \
+                                  --outcountsel {output.counts_el} \
+                                  --outsurrtot {output.surrs_tot} \
+                                  --outsurrel {output.surrs_el} \
+                                  --outobj {output.epoch}
+        """
+
+rule remove_synchrofact_electrodes:
+    input:
+        odml = rules.metadata_SNR.output.odml,
+        lowFR = rules.count_synchrofacts.output.lowFR,
+        synobj = rules.count_synchrofacts.output.epoch,
+        counts_tot = rules.count_synchrofacts.output.counts_tot,
+        counts_el = rules.count_synchrofacts.output.counts_el,
+        surrs_tot = rules.count_synchrofacts.output.surrs_tot,
+        surrs_el = rules.count_synchrofacts.output.surrs_el,
+        script = join(CODE_DIR,
+                      'synchrofacts',
+                      'systematic_removal_of_electrodes.py')
+    output:
+        plotdir = directory(join(METADATA_DIR,
+                                 'cross_talk_removal',
+                                 '{monkey}_RS_{ses}_removal_plots')),
+        csv = join(METADATA_DIR,
+                   'cross_talk_removal',
+                   '{monkey}_RS_{ses}_removal_metadata.csv')
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    resources:
+        mem_mb = mem_lim_synchrofacts,  # MB
+        cpus = cpus_synchrofacts
+    shell:
+        """
+            python {input.script} --ses {wildcards.monkey}_RS_{wildcards.ses} \
+                                  --odml {input.odml} \
+                                  --lowFR {input.lowFR} \
+                                  --syn-obj {input.synobj} \
+                                  --orig-tot-cpx {input.counts_tot} \
+                                  --orig-el-cpx {input.counts_el} \
+                                  --surr-tot-cpx {input.surrs_tot} \
+                                  --surr-el-cpx {input.surrs_el} \
+                                  --plot-dir {output.plotdir} \
+                                  --out-csv {output.csv}
+        """
+
+
+'''
+PLOTTING
+'''
+
+rule plot_SNR:
+    input:
+        odml_template = rules.metadata_SNR.output.odml,
+        script_SNR = join(CODE_DIR,
+                          'plotting',
+                          'arrayplot_SNR.py'),
+    output:
+        SNR = join(METADATA_DIR,
+                   'signal_to_noise_ratio',
+                   '{monkey}_{exp}_{ses}_arrayplot.pdf'),
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    shell:
+        """
+            python {input.script_SNR} --odml {input.odml_template} \
+                                        --out {output.SNR}
+        """
+
+rule plot_response_timing:
+    input:
+        odml_template = rules.metadata_SNR.output.odml,
+        script_timing = join(CODE_DIR,
+                             'plotting',
+                             'arrayplot_response_timing.py'),
+    output:
+        r_timing = join(METADATA_DIR,
+                        'stimulus_evoked_response_timing',
+                        '{monkey}_{exp}_{ses}_response_timing_arrayplot.pdf'),
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    shell:
+        """
+            python {input.script_timing} --odml {input.odml_template} \
+                                         --out {output.r_timing}
+        """
+
+rule plot_eyes:
+    input:
+        nix = join(SOURCE,
+                   'data',
+                   '{monkey}_RS_{ses}',
+                   'eye_signals',
+                   '{monkey}_RS_{ses}_aligned_eye_data_downsampled_1Hz.nix'),
+        script = join(CODE_DIR,
+                      'plotting',
+                      'eye_epochs_plot.py'),
+        muae = sample_MUAe_array_for_eyeplot
+    output:
+        fig = join(METADATA_DIR,
+                   'eye_signals',
+                   '{monkey}_RS_{ses}_eyes.pdf')
+    conda:
+        join(CODE_DIR, "environment.yaml")
+    shell:
+        """
+            python {input.script} --eyenix {input.nix} \
+                                  --muae {input.muae} \
+                                  --out {output.fig}
+        """
+
+rule workflow_diagrams:
+    output:
+        rulegraph = join(CODE_DIR, 'rulegraph.png'),
+        dag = join(CODE_DIR, 'dag.pdf')
+    shell:
+        """
+        mv ~/tmp_rulegraph.png {output.rulegraph}
+        mv ~/tmp_dag.pdf {output.dag}
+        """
