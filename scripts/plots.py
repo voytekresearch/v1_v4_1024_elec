@@ -57,7 +57,7 @@ def plot_schematic(data, odml_path, fname_out=None):
     rcParams['axes.linewidth'] = 0.5
 
     # Create figure and axes
-    fig, ax = plt.subplots(figsize=(4, 3))
+    fig, ax = plt.subplots(figsize=(12, 6))
 
     # Define a color map and normalization of values
     norm = LogNorm(vmin=np.nanmin(data), vmax=np.nanmax(data), clip=True)
@@ -93,11 +93,11 @@ def plot_schematic(data, odml_path, fname_out=None):
     y = [4500, 2700, 720, -2600]
     fun = interp1d(x, y, kind='cubic')
     samples = np.linspace(max(x), min(x), num=100)
-    plt.plot(samples, fun(samples), '--', c='k', lw=0.8)
+    plt.plot(samples, fun(samples), '--', c='k', lw=2)
 
     # Insert area labels
-    plt.text(-6000, -1800, 'V4', fontsize=9)
-    plt.text(-3300, -3000, 'V1', fontsize=9)
+    plt.text(-6000, -1800, 'V4', fontsize=16)
+    plt.text(-3300, -3000, 'V1', fontsize=16)
 
     # Formatting of plot
     plt.axis('equal')
@@ -109,3 +109,5 @@ def plot_schematic(data, odml_path, fname_out=None):
     plt.tight_layout()
     if not fname_out is None:
         plt.savefig(fname_out, dpi=600, transparent=True)
+
+    return fig, ax
