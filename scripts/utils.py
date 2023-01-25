@@ -122,3 +122,31 @@ def epoch_nix(fname):
     signal_epoch = epoch_neo_segment(segment)
 
     return signal_epoch
+
+
+def comp_psd_diff(psd_pre, psd_post):
+    """
+    Compute the difference of log psd.
+    
+    Parameters
+    ----------
+    psd_pre : array
+        Array of pre-stimulus psd.
+    psd_post : array
+        Array of post-stimulus psd.
+
+    Returns
+    -------
+    log_psd_diff : array
+        Array of log psd difference.
+    
+    """
+    
+    # compute log psd
+    log_psd_pre = np.log(psd_pre)
+    log_psd_post = np.log(psd_post)
+    
+    # compute difference
+    log_psd_diff = log_psd_post - log_psd_pre
+
+    return log_psd_diff
