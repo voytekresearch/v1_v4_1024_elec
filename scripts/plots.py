@@ -66,7 +66,7 @@ def plot_psd_diff(freq, psd_diff, fname_out=None):
     return fig, ax
 
 
-def plot_schematic(data, odml_path, norm_type='linear', fname_out=None):
+def plot_schematic(data, odml_path, label=None, norm_type='linear', fname_out=None):
     """
     Plot data from all electrodes in a schematic view.
 
@@ -95,6 +95,8 @@ def plot_schematic(data, odml_path, norm_type='linear', fname_out=None):
     from matplotlib.patches import Rectangle
     from matplotlib.colors import Normalize, LogNorm, CenteredNorm, TwoSlopeNorm
     from matplotlib.collections import PatchCollection
+    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+    from matplotlib.ticker import LogFormatter
     from scipy.interpolate import interp1d
 
     # Load metadata
@@ -168,6 +170,26 @@ def plot_schematic(data, odml_path, norm_type='linear', fname_out=None):
     plt.axis('off')
     plt.tight_layout()
     ax.set_ylim(-5400, 6000)
+
+    # Colorbar
+    axin1 = inset_axes(ax,
+                       width="100%", height="100%",
+                       bbox_to_anchor=(0.15, 0.15, 0.3, 0.03),
+                       bbox_transform=ax.transAxes)
+    if norm_type == 'log':
+        formatter = LogFormatter(10, labelOnlyBase=False)
+        cb = plt.colorbar(pc,
+                        cax=axin1,
+                        orientation='horizontal',
+                        format=formatter,
+                        extend='max'
+                        )
+    else:
+        cb = plt.colorbar(pc,
+                        cax=axin1,
+                        orientation='horizontal')
+    if not label is None:
+        cb.ax.set_xlabel(label)
 
     # Savefig
     plt.tight_layout()
