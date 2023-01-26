@@ -66,7 +66,7 @@ def plot_psd_diff(freq, psd_diff, fname_out=None):
     return fig, ax
 
 
-def plot_schematic(data, odml_path, fname_out=None):
+def plot_schematic(data, odml_path, norm_type='linear', fname_out=None):
     """
     Plot data from all electrodes in a schematic view.
 
@@ -79,6 +79,8 @@ def plot_schematic(data, odml_path, fname_out=None):
         Data to plot.
     odml_path : str
         Path to odML file containing electrode metadata.
+    norm_type : str, optional
+        Normalization type. Must be 'log' or 'centered'.
     fname_out : str, optional
         Path to save figure to. If None, figure is not saved.
 
@@ -91,7 +93,7 @@ def plot_schematic(data, odml_path, fname_out=None):
     # Imports
     import odml
     from matplotlib.patches import Rectangle
-    from matplotlib.colors import LogNorm, ListedColormap
+    from matplotlib.colors import Normalize, LogNorm, CenteredNorm, TwoSlopeNorm
     from matplotlib.collections import PatchCollection
     from scipy.interpolate import interp1d
 
@@ -108,17 +110,24 @@ def plot_schematic(data, odml_path, fname_out=None):
     # Get distance between electrodes (relevant for creating rectangles)
     dist = float(arrays.properties['ElectrodeSeparation'].values[0])
 
-    # Get SNR threshold
-    SNR_thresh = metadata['Recording'].properties['SNR_threshold'].values[0]
-
     # Create figure and axes
     fig, ax = plt.subplots(figsize=(12, 6))
 
     # Define a color map and normalization of values
-    norm = LogNorm(vmin=np.nanmin(data), vmax=np.nanmax(data), clip=True)
-    cmap = plt.get_cmap('Greens', 10000)
-    newcolors = cmap(np.linspace(0, 1, 10000))[2000:, :]
-    cmap = ListedColormap(newcolors)
+    if norm_type == 'linear':
+        norm = Normalize(vmin=np.nanmin(data), vmax=np.nanmax(data))
+        cmap = 'hot'
+    elif norm_type == 'log':
+        norm = LogNorm(vmin=np.nanmin(data), vmax=np.nanmax(data))
+        cmap = 'hot'
+    elif norm_type == 'centered':
+        norm = CenteredNorm(vcenter=0)
+        cmap = 'coolwarm'
+    elif norm_type == 'twoslope':
+        norm = TwoSlopeNorm(vcenter=0, vmin=np.nanmin(data), vmax=np.nanmax(data))
+        cmap = 'coolwarm'
+    else:
+        print("norm_type must be 'log' or 'centered'")
 
     # Iterate over electrodes to extract relevant data and create rectangles
     boxes = []
