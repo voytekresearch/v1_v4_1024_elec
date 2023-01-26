@@ -11,12 +11,12 @@ from fooof import FOOOFGroup, fit_fooof_3d
 
 # Settings
 PROJECT_PATH = 'G:/Shared drives/v1_v4_1024/'
-SESSIONS = ['L_SNR_250717'] # List of sessions to analyze
+SESSIONS = ['L_SNR_250717','A_SNR_140819'] # List of sessions to analyze
 FS = 500 # sampling frequency (Hz)
 AVERAGE_TRIALS = True # average across trials before fitting
 
 # SpecParam settings
-FREQ_RANGE = [1, 40] 
+FREQ_RANGE = [1, 100] 
 N_JOBS = -1 # number of jobs for parallel processing
 SPEC_PARAM_SETTINGS = {
     'peak_width_limits' :   [4, 20], # default: (0.5, 12.0)) - reccomends at least frequency resolution * 2
