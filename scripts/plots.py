@@ -66,7 +66,8 @@ def plot_psd_diff(freq, psd_diff, fname_out=None):
     return fig, ax
 
 
-def plot_schematic(data, odml_path, label=None, norm_type='linear', fname_out=None):
+def plot_schematic(data, odml_path, label=None, fname_out=None,
+                   norm_type='linear', vmin=None, vmax=None):
     """
     Plot data from all electrodes in a schematic view.
 
@@ -80,7 +81,7 @@ def plot_schematic(data, odml_path, label=None, norm_type='linear', fname_out=No
     odml_path : str
         Path to odML file containing electrode metadata.
     norm_type : str, optional
-        Normalization type. Must be 'linear', 'log', 'centered', or 'twoslope'.
+        Normalization type. Must be 'linear', 'log', 'centered', or 'two_slope'.
     fname_out : str, optional
         Path to save figure to. If None, figure is not saved.
 
@@ -116,20 +117,25 @@ def plot_schematic(data, odml_path, label=None, norm_type='linear', fname_out=No
     fig, ax = plt.subplots(figsize=(12, 6))
 
     # Define a color map and normalization of values
+    if vmin is None:
+        vmin = np.nanmin(data)
+    if vmax is None:
+        vmax = np.nanmax(data)
+
     if norm_type == 'linear':
-        norm = Normalize(vmin=np.nanmin(data), vmax=np.nanmax(data))
+        norm = Normalize(vmin=vmin, vmax=vmax)
         cmap = 'hot'
     elif norm_type == 'log':
-        norm = LogNorm(vmin=np.nanmin(data), vmax=np.nanmax(data))
+        norm = LogNorm(vmin=vmin, vmax=vmax)
         cmap = 'hot'
     elif norm_type == 'centered':
         norm = CenteredNorm(vcenter=0)
         cmap = 'coolwarm'
-    elif norm_type == 'twoslope':
-        norm = TwoSlopeNorm(vcenter=0, vmin=np.nanmin(data), vmax=np.nanmax(data))
+    elif norm_type == 'two_slope':
+        norm = TwoSlopeNorm(vcenter=0, vmin=vmin, vmax=vmax)
         cmap = 'coolwarm'
     else:
-        print("norm_type must be 'log' or 'centered'")
+        print("norm_type must be 'linear', 'log', 'centered', or 'two_slope'")
 
     # Iterate over electrodes to extract relevant data and create rectangles
     boxes = []
