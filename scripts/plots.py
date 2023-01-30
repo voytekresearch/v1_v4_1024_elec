@@ -80,10 +80,14 @@ def plot_schematic(data, odml_path, label=None, fname_out=None,
         Data to plot.
     odml_path : str
         Path to odML file containing electrode metadata.
-    norm_type : str, optional
-        Normalization type. Must be 'linear', 'log', 'centered', or 'two_slope'.
     fname_out : str, optional
         Path to save figure to. If None, figure is not saved.
+    norm_type : str, optional
+        Normalization type. Must be 'linear', 'log', 'centered', or 'two_slope'.
+    vmin : float, optional
+        Minimum value for colorbar. If None, minimum value of data is used.
+    vmax : float, optional
+        Maximum value for colorbar. If None, maximum value of data is used.
 
     Returns
     -------
