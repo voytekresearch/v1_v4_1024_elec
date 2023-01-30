@@ -80,7 +80,7 @@ def plot_schematic(data, odml_path, label=None, norm_type='linear', fname_out=No
     odml_path : str
         Path to odML file containing electrode metadata.
     norm_type : str, optional
-        Normalization type. Must be 'log' or 'centered'.
+        Normalization type. Must be 'linear', 'log', 'centered', or 'twoslope'.
     fname_out : str, optional
         Path to save figure to. If None, figure is not saved.
 
