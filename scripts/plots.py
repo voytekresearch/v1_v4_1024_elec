@@ -80,6 +80,8 @@ def plot_schematic(data, odml_path, label=None, fname_out=None,
         Data to plot.
     odml_path : str
         Path to odML file containing electrode metadata.
+    label : str
+        colorbar label.
     fname_out : str, optional
         Path to save figure to. If None, figure is not saved.
     norm_type : str, optional
