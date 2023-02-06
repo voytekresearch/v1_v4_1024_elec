@@ -66,7 +66,7 @@ def plot_psd_diff(freq, psd_diff, fname_out=None):
     return fig, ax
 
 
-def plot_schematic(data, odml_path, label=None, fname_out=None,
+def plot_schematic(data, odml_path, label=None, title=None, fname_out=None,
                    norm_type='linear', vmin=None, vmax=None):
     """
     Plot data from all electrodes in a schematic view.
@@ -82,6 +82,8 @@ def plot_schematic(data, odml_path, label=None, fname_out=None,
         Path to odML file containing electrode metadata.
     label : str
         colorbar label.
+    title : str
+        figure title.
     fname_out : str, optional
         Path to save figure to. If None, figure is not saved.
     norm_type : str, optional
@@ -202,6 +204,10 @@ def plot_schematic(data, odml_path, label=None, fname_out=None,
                         orientation='horizontal')
     if not label is None:
         cb.ax.set_xlabel(label)
+
+    # add title
+    if not title is None:
+        ax.set_title(title)
 
     # Savefig
     plt.tight_layout()
