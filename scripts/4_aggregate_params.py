@@ -49,7 +49,7 @@ def main():
             df_array['post_r2'] = post_r2
             
             # add session, channel and array
-            sess = np.repeat('L_SNR_250717', len(pre_exp))
+            sess = np.repeat(session, len(pre_exp))
             channel = np.linspace(0, len(pre_exp)-1, len(pre_exp))
             df_array['session'] = sess
             df_array['channel'] = channel
