@@ -23,11 +23,15 @@ SPEC_PARAM_SETTINGS = {
     'min_peak_height'   :   0.1, 
     'max_n_peaks'       :   4, # (default: inf)
     'peak_threshold'    :   2.0, # (default: 2.0)
-    'aperiodic_mode'           :   'knee'}
+    'aperiodic_mode'    :   'knee',
+    'verbose'           :   False}
 
 def main():
     # loop through sessions of interest
     for session in SESSIONS:
+        # display progress
+        print(f"\nAnalyzing session: {session}")
+
         # identify/create directories
         path_in = f'{PROJECT_PATH}/data/lfp/lfp_psd/{session}'
         path_out = f'{PROJECT_PATH}/data/lfp/lfp_params/{session}'
@@ -38,7 +42,7 @@ def main():
         files = os.listdir(path_in)
         for i_file, fname_in in enumerate(files):
             # show progress
-            print(f'Processing file {i_file+1}/{len(files)}: \t{fname_in}')
+            print(f'    Processing file {i_file+1}/{len(files)}: \t{fname_in}')
 
             # load data
             data_in = np.load(f'{path_in}/{fname_in}')

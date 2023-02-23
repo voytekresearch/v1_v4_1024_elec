@@ -1,6 +1,6 @@
 
 """
-compute power spectral density (PSD) for all LFP files in a given folder
+Compute power spectral density (PSD).
 
 """
 
@@ -12,7 +12,7 @@ from mne.time_frequency import psd_array_multitaper
 
 # Settings
 PROJECT_PATH = 'G:/Shared drives/v1_v4_1024/'
-SESSIONS = ['L_SNR_250717'] # List of essions to analyze
+SESSIONS = ['A_SNR_140819','L_SNR_250717'] # List of essions to analyze
 FS = 500 # sampling frequency (Hz)
 # F_RANGE = None # frequency range for spectral analysis. None defaults to 2 cycles at lowest freq and Nyquist freq
 N_JOBS = -1 # number of jobs for parallel processing
@@ -20,6 +20,9 @@ N_JOBS = -1 # number of jobs for parallel processing
 def main():
     # loop through sessions of interest
     for session in SESSIONS:
+        # display progress
+        print(f"\nAnalyzing session: {session}")
+
         # identify/create directories
         path_in = f'{PROJECT_PATH}/data/lfp/lfp_epochs/{session}'
         path_out = f'{PROJECT_PATH}/data/lfp/lfp_psd/{session}'
@@ -30,14 +33,14 @@ def main():
         files = os.listdir(path_in)
         for i_file, fname_in in enumerate(files):
             # show progress
-            print(f'Processing file {i_file+1}/{len(files)}: \t{fname_in}')
+            print(f'    Processing file {i_file+1}/{len(files)}: \t{fname_in}')
 
             # load data
             data_in = np.load(f'{path_in}/{fname_in}')
             
             # compute PSD
             # freq, spectra = compute_spectrum_3d(data_in, FS, f_range=F_RANGE) 
-            spectra, freq = psd_array_multitaper(data_in, FS, n_jobs=N_JOBS)
+            spectra, freq = psd_array_multitaper(data_in, FS, n_jobs=N_JOBS, verbose=False)
 
             # save results
             fname_out = fname_in.replace('.npy', '.npz')
