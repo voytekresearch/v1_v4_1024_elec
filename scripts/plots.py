@@ -8,8 +8,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
-
 # Matplotlib params
+rcParams['xtick.labelsize'] = 12
+rcParams['ytick.labelsize'] = 12
+rcParams['axes.labelsize'] = 14
+rcParams['axes.titlesize'] = 16
 rcParams['savefig.dpi'] = 300
 rcParams['figure.facecolor'] = 'w'
 
@@ -35,12 +38,6 @@ def plot_psd_diff(freq, psd_diff, fname_out=None):
     
     """
 
-   # Matplotlib params
-    rcParams['xtick.labelsize'] = 12
-    rcParams['ytick.labelsize'] = 12
-    rcParams['axes.labelsize'] = 14
-    rcParams['axes.titlesize'] = 16
-
     # plot psd
     fig, ax = plt.subplots(1, 1, figsize=(10, 5))
     ax.plot(freq, psd_diff.T, color='grey')
@@ -57,7 +54,7 @@ def plot_psd_diff(freq, psd_diff, fname_out=None):
     ax.axhline(0, color='r', linestyle='--', linewidth=3)
 
     # scale x-axis logarithmically
-    ax.set(xscale="log");
+    ax.set(xscale="log")
 
     # Savefig
     if not fname_out is None:
