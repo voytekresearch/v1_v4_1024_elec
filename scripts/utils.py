@@ -150,3 +150,30 @@ def comp_psd_diff(psd_pre, psd_post):
     log_psd_diff = log_psd_post - log_psd_pre
 
     return log_psd_diff
+
+
+def comp_erp_params(erp):
+    # init
+    params = pd.DataFrame()
+
+    # use scipy.find_peaks to find parameters
+    peaks_pos, _ = find_peaks(erp, height=height, distance = 10) 
+    peaks_neg, _ = find_peaks(-erp, height=height, distance = 10)
+
+    peaks = np.sort(np.concatenate([peaks_pos, peaks_neg]))
+    order = np.argsort(np.concatenate([peaks_pos, peaks_neg]))
+    params['indices'] = peaks
+    
+    # latency
+    params['latency'] = time[peaks]
+
+    # amplitude
+    params['amp'] = erp[peaks]
+
+    # find peaks width
+    widths_pos, _, _, _ = peak_widths(erp, peaks_pos)
+    widths_neg, _, _, _ = peak_widths(-erp, peaks_neg)
+    widths = np.concatenate([widths_pos, widths_neg])
+    params['widths'] = widths[order]
+
+    return params
