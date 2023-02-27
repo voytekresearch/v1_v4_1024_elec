@@ -46,6 +46,7 @@ def main():
             lfp_post = lfp[..., IDX_ZERO : IDX_ZERO+n_samples]
 
             # save data to file
+            np.save(f"{path_out}/{file.replace('.nix','.npy')}", lfp)
             np.save(f"{path_out}/{file.replace('.nix','_pre.npy')}", lfp_pre)
             np.save(f"{path_out}/{file.replace('.nix','_post.npy')}", lfp_post)
 
