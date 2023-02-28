@@ -152,20 +152,42 @@ def comp_psd_diff(psd_pre, psd_post):
     return log_psd_diff
 
 
-def comp_erp_params(erp):
+def comp_erp_params(erp, height_thresh=1, min_distance=10):
+    """
+    Compute ERP parameters (latency, amplitude, width) using scipy.find_peaks.
+
+    Parameters
+    ----------
+    erp : array
+        event related potential (1D array).
+    height_thresh : float, optional
+        Height threshold for peak detection. The unit here is standard
+        deviations above the mean. The default is 1.
+    min_distance : int, optional
+        Minimum distance between peaks (in samples). The default is 10.
+
+    Returns
+    -------
+    params : pandas.DataFrame
+        DataFrame containing the parameters of the ERP.
+
+    """
+    # imports
+    import pandas as pd
+    from scipy.signal import find_peaks, peak_widths
+
+    # define height thresold
+    height = np.mean(erp) + (height_thresh * np.std(erp))
+
     # init
     params = pd.DataFrame()
 
     # use scipy.find_peaks to find parameters
-    peaks_pos, _ = find_peaks(erp, height=height, distance = 10) 
-    peaks_neg, _ = find_peaks(-erp, height=height, distance = 10)
-
+    peaks_pos, _ = find_peaks(erp, height=height, distance=min_distance) 
+    peaks_neg, _ = find_peaks(-erp, height=height, distance=min_distance)
     peaks = np.sort(np.concatenate([peaks_pos, peaks_neg]))
-    order = np.argsort(np.concatenate([peaks_pos, peaks_neg]))
-    params['indices'] = peaks
-    
-    # latency
-    params['latency'] = time[peaks]
+    order = np.argsort(np.concatenate([peaks_pos, peaks_neg])) #use to sort widths
+    params['latency'] = peaks
 
     # amplitude
     params['amp'] = erp[peaks]
