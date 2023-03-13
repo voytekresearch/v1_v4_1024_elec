@@ -36,10 +36,10 @@ def main():
             'session'   :   np.repeat(session, N_ARRAYS*N_CHANS),
             'channel'   :   np.arange(N_ARRAYS*N_CHANS),
             'array'     :   np.repeat(np.arange(N_ARRAYS), N_CHANS)}
-        df_sess = pd.DataFrame(data=data)
 
         # loop through epochs
         for epoch in ['pre', 'post']:
+            df_sess = pd.DataFrame(data=data)
             df_sess['epoch'] = epoch
             
             # import data
