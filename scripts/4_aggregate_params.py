@@ -36,7 +36,7 @@ def main():
             'session'   :   np.repeat(session, N_ARRAYS*N_CHANS),
             'channel'   :   np.concatenate([np.arange(N_CHANS)] * N_ARRAYS),
             'chan_idx'  :   np.arange(N_ARRAYS*N_CHANS),
-            'array'     :   np.repeat(np.arange(N_ARRAYS), N_CHANS)}
+            'array'     :   np.repeat(np.arange(N_ARRAYS), N_CHANS) + 1}
 
         # loop through epochs
         for epoch in ['pre', 'post']:
@@ -48,8 +48,8 @@ def main():
             fg.load(fr"G:\Shared drives\v1_v4_1024\data\lfp\lfp_params\{session}_lfp_{epoch}.csv")
 
             # add exponent and r-squared to dataframe
-            df_sess[f'exp_{epoch}'] = fg.get_params('aperiodic_params', 'exponent')
-            df_sess[f'r2_{epoch}'] = fg.get_params('r_squared')
+            df_sess[f'exp'] = fg.get_params('aperiodic_params', 'exponent')
+            df_sess[f'r2'] = fg.get_params('r_squared')
             
             # add to list
             dfs.append(df_sess)
