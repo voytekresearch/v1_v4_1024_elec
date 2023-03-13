@@ -40,11 +40,13 @@ def main():
 
         # loop through epochs
         for epoch in ['pre', 'post']:
+            df_sess['epoch'] = epoch
+            
             # import data
             fg = FOOOFGroup()
             fg.load(fr"G:\Shared drives\v1_v4_1024\data\lfp\lfp_params\{session}_lfp_{epoch}.csv")
 
-            # add exponent anf r-squared to dataframe
+            # add exponent and r-squared to dataframe
             df_sess[f'exp_{epoch}'] = fg.get_params('aperiodic_params', 'exponent')
             df_sess[f'r2_{epoch}'] = fg.get_params('r_squared')
             
