@@ -34,7 +34,8 @@ def main():
         # create dataframe for session data
         data = {
             'session'   :   np.repeat(session, N_ARRAYS*N_CHANS),
-            'channel'   :   np.arange(N_ARRAYS*N_CHANS),
+            'channel'   :   np.concatenate([np.arange(N_CHANS)] * N_ARRAYS),
+            'chan_idx'  :   np.arange(N_ARRAYS*N_CHANS),
             'array'     :   np.repeat(np.arange(N_ARRAYS), N_CHANS)}
 
         # loop through epochs
