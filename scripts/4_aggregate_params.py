@@ -48,7 +48,8 @@ def main():
             fg.load(fr"G:\Shared drives\v1_v4_1024\data\lfp\lfp_params\{session}_lfp_{epoch}.csv")
 
             # add exponent and r-squared to dataframe
-            df_sess[f'exp'] = fg.get_params('aperiodic_params', 'exponent')
+            for ap_param in ['offset', 'knee', 'exponent']:
+                df_sess[ap_param] = fg.get_params('aperiodic_params', ap_param)
             df_sess[f'r2'] = fg.get_params('r_squared')
             
             # add to list
