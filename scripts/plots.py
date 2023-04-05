@@ -278,7 +278,7 @@ def plot_spectra_2conditions(spectra_a, spectra_b, freq, ax=None, shade_sem=True
 
 
 def plot_erp(erp, time, x_units='s', y_units='\u03BCV', 
-    annotate_time=0, legend_labels=None, ax=None):
+    annotate_times=[0], legend_labels=None, ax=None):
     """Plots a voltage versus time graph of an evoked response (ERP).
 
     Parameters
@@ -291,8 +291,8 @@ def plot_erp(erp, time, x_units='s', y_units='\u03BCV',
         Units for the x-axis (default is 's').
     y_units : str, optional
         Units for the y-axis (default is 'μV').
-    annotate_time : float, optional
-        Time point to annotate with a vertical line (default is 0).
+    annotate_times : list, optional
+        Time points to annotate with a vertical line (default is [0]).
     legend_labels : list, optional
         List of labels for the legend (default is None).
     ax : matplotlib.axes.Axes, optional
@@ -309,7 +309,6 @@ def plot_erp(erp, time, x_units='s', y_units='\u03BCV',
         fig, ax = plt.subplots()
 
     # one ERP only
-    print(erp.shape)
     if np.ndim(erp) == 1:
         # plot
         ax.plot(time, erp)
@@ -328,8 +327,9 @@ def plot_erp(erp, time, x_units='s', y_units='\u03BCV',
     ax.set_title('Evoked Response')
 
     # annotate
-    if not annotate_time is None:
-        ax.axvline(annotate_time, color='k', linestyle='--')
+    if annotate_times is not None:
+        for annotate_time in annotate_times:
+            ax.axvline(annotate_time, color='k', linestyle='--')
 
     else:
         raise ValueError('ERP must be a 1D or 2D array')
