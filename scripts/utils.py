@@ -152,6 +152,60 @@ def comp_psd_diff(psd_pre, psd_post):
     return log_psd_diff
 
 
+def subtract_baseline(signal, time, t_baseline):
+    """Subtracts the mean of the signal in a given time interval from the signal.
+
+    Parameters
+    ----------
+    signal : array
+        Signal array to subtract mean from
+    time : array
+        Array with the corresponding time points of the signal array
+    t_baseline : array
+        Array with the starting and ending time points for the time interval
+
+    Returns
+    -------
+    signal : array
+        Signal array with mean of the given time interval subtracted
+    """
+
+    baseline = np.logical_and(time>=t_baseline[0], time<=t_baseline[1])
+    signal = signal - np.mean(signal[baseline])
+
+    return signal
+
+
+def compute_erp(signal, time, t_baseline):
+    """Compute the event-related potential (ERP) of a signal.
+
+    Parameters
+    ----------
+    signal : ndarray
+        Input signal with shape (n_trials, n_channels, n_samples).
+    time : ndarray
+        Timepoints associated with the signal.
+    t_baseline : list
+        Interval of timepoints used to calculate the baseline of each trial.
+
+    Returns
+    -------
+    erp : ndarray
+        Event-related potential with shape (n_channels, n_samples).
+    """
+
+    # subtract baseline
+    signal_norm = np.zeros_like(signal)
+    for i_trial in range(signal.shape[0]):
+        for i_channel in range(signal.shape[1]):
+            signal_norm[i_trial][i_channel] = subtract_baseline(signal[i_trial][i_channel], time, t_baseline)
+
+    # compute ERP (channel-wise)
+    erp = np.mean(signal_norm, axis=0)
+
+    return erp
+
+
 def comp_erp_params(erp, height_thresh=1, min_distance=10):
     """
     Compute ERP parameters (latency, amplitude, width) using scipy.find_peaks.
