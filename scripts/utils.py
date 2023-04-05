@@ -253,3 +253,32 @@ def comp_erp_params(erp, height_thresh=1, min_distance=10):
     params['widths'] = widths[order]
 
     return params
+
+
+def trim_signal(signal, time, epoch, dim=None):
+    """
+    trim signal in time.
+
+    Parameters
+    ----------
+    signal : float, array-like
+        signal to trim.
+    time : float, array-like
+        associated time vector to trim.
+    epoch : float, array-like or list, length: 2
+        time window of interest (start_time, end_time)
+
+    Returns
+    -------
+    signal : float, array-like
+        trimmed signal.
+    time : float, array-like
+        trimmed time vector.
+
+    """
+
+    mask = (time>=epoch[0]) & (time<=epoch[1])
+    time = time[mask]
+    signal = signal[..., mask]        
+
+    return signal, time
