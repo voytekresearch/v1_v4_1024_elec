@@ -34,7 +34,7 @@ def plot_psd_diff(freq, psd_diff, fname_out=None):
 
     Returns
     -------
-    fig, ax : matplotlib figure and axes objects
+    None.
     
     """
 
@@ -59,8 +59,6 @@ def plot_psd_diff(freq, psd_diff, fname_out=None):
     # Savefig
     if not fname_out is None:
         plt.savefig(fname_out, transparent=False)
-
-    return fig, ax
 
 
 def plot_schematic(data, odml_path, label=None, title=None, fname_out=None,
@@ -92,7 +90,7 @@ def plot_schematic(data, odml_path, label=None, title=None, fname_out=None,
 
     Returns
     -------
-    fig, ax : matplotlib figure and axes objects    
+    None.
     
     """
 
@@ -211,7 +209,6 @@ def plot_schematic(data, odml_path, label=None, title=None, fname_out=None,
     if not fname_out is None:
         plt.savefig(fname_out, transparent=False)
 
-    return fig, ax
 
 def plot_spectra_2conditions(spectra_a, spectra_b, freq, ax=None, shade_sem=True,
                              color=['grey','k'], labels=['baseline','encoding'],
@@ -239,8 +236,7 @@ def plot_spectra_2conditions(spectra_a, spectra_b, freq, ax=None, shade_sem=True
 
     Returns
     -------
-    fig, ax : matplotlib figure and axis
-        Figure and axis of plot.
+    None.
     """
 
     # imports
@@ -304,16 +300,13 @@ def plot_erp(erp, time, x_units='s', y_units='\u03BCV',
 
     Returns
     -------
-    fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
+    None.
 
     """
 
     # create figure
     if ax is None:
         fig, ax = plt.subplots()
-        ax_provided = False
-    else:
-        ax_provided = True
 
     # one ERP only
     print(erp.shape)
@@ -341,16 +334,10 @@ def plot_erp(erp, time, x_units='s', y_units='\u03BCV',
     else:
         raise ValueError('ERP must be a 1D or 2D array')
 
-    # return
-    if ax_provided:
-        return ax
-    else:
-        return fig, ax
-
 
 def plot_event_traces(event_traces, time, annotate_time=0,
     plot_mean=True, plot_std=True, plot_individual=False,
-    x_units='s', y_units='\u03BCV'):
+    x_units='s', y_units='\u03BCV', ax=None):
 
     """Plots event traces and related statistics.
 
@@ -372,15 +359,17 @@ def plot_event_traces(event_traces, time, annotate_time=0,
         The string to use in the x-axis label. The default is 's'
     y_units : str, optional
         The string to use in the y-axis label. The default is 'µV'
+    ax : matplotlib.axes.Axes, optional
+        Axes object to plot on. The default is None.
 
     Returns
     -------
-    fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
-
+    None.
     """
 
     # create figure
-    fig, ax = plt.subplots()
+    if ax is None:
+        fig, ax = plt.subplots()
 
     # plot individual traces
     if plot_individual:
@@ -404,4 +393,3 @@ def plot_event_traces(event_traces, time, annotate_time=0,
     if not annotate_time is None:
         ax.axvline(annotate_time, color='k', linestyle='--')
 
-    return fig, ax
