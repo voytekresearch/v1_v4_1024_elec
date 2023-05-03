@@ -45,7 +45,7 @@ def main():
             
             # import data
             fg = FOOOFGroup()
-            fg.load(fr"G:\Shared drives\v1_v4_1024\data\lfp\lfp_params\{session}_lfp_{epoch}.csv")
+            fg.load(fr"G:\Shared drives\v1_v4_1024\data\lfp\lfp_params\{session}")
 
             # add exponent and r-squared to dataframe
             for ap_param in ['offset', 'knee', 'exponent']:

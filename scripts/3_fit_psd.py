@@ -53,7 +53,7 @@ def main():
                 freq_range=FREQ_RANGE, n_jobs=N_JOBS)
 
         # save results
-        fname_out = fname_in.replace('.npz', '.csv')
+        fname_out = fname_in.replace('.npz', '')
         fg.save(f"{path_out}/{fname_out}", save_results=True, save_settings=True)
 
 
