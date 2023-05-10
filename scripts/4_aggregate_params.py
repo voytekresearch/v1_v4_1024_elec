@@ -23,8 +23,8 @@ def main():
 
     # get session IDs
     files = os.listdir(path_in)
-    sessions = [fname.replace('_lfp_post.csv', '') for fname in files]
-    sessions = [fname.replace('_lfp_pre.csv', '') for fname in sessions]
+    sessions = [fname.replace('_lfp_post.json', '') for fname in files]
+    sessions = [fname.replace('_lfp_pre.json', '') for fname in sessions]
     sessions = np.unique(sessions)
 
     # loop through sessions
@@ -45,7 +45,7 @@ def main():
             
             # import data
             fg = FOOOFGroup()
-            fg.load(fr"G:\Shared drives\v1_v4_1024\data\lfp\lfp_params\{session}")
+            fg.load(fr"G:\Shared drives\v1_v4_1024\data\lfp\lfp_params\{session}_lfp_{epoch}.json")
 
             # add exponent and r-squared to dataframe
             for ap_param in ['offset', 'knee', 'exponent']:
