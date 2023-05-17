@@ -14,7 +14,7 @@ from utils import epoch_nix
 
 # settings
 PROJECT_PATH = 'G:/Shared drives/v1_v4_1024'
-SESSIONS = ['A_SNR_140819','L_SNR_250717'] # List of sessions to analyze
+SESSIONS = ['A_SNR_041018','A_SNR_140819','L_SNR_250717'] # List of sessions to analyze
 FS = 500 # LFP sampling frequency (Hz)
 IDX_ZERO = 150 # index of zero in the lfp epoch (stimulus onset)
 DURATION = 0.3 # duration of pre-/post-stimulus epoch (s)
