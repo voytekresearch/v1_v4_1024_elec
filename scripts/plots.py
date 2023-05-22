@@ -393,3 +393,71 @@ def plot_event_traces(event_traces, time, annotate_time=0,
     if not annotate_time is None:
         ax.axvline(annotate_time, color='k', linestyle='--')
 
+
+def plot_regression(x_data, y_data, ax=None, title=None, xlabel=None, 
+                    ylabel=None, fname_out=None, label='', label_offset=0):
+    """
+    Calculate and plot the linear regression for two datasets, with optional labels and file output.
+    Parameters
+    ----------
+    x_data : 1-d array_like
+        x-values of the dataset
+    y_data : 1-d array_like
+        y-values of the dataset
+    title : str, optional
+        Title of the plot
+    xlabel : str, optional
+        x-axis label of the plot
+    ylabel : str, optional
+        y-axis label of the plot
+    fname_out : str, optional
+        Filename of the output figure
+
+    Returns
+    -------
+    None
+
+    """
+
+    # imports
+    from scipy.stats import linregress
+    
+    # create figure
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
+        fig.patch.set_facecolor('white') # set background color to white for text legibility
+        
+    # plot data
+    ax.scatter(x_data, y_data, alpha=0.1)
+
+    # run regression and plot results
+    results = linregress(x_data, y_data)
+    t_lin = np.linspace(np.nanmin(x_data), np.nanmax(x_data), 100)
+    lin = results.slope * t_lin + results.intercept
+    ax.plot(t_lin, lin, label=label, linewidth=3)
+
+    # add regression results text
+    if results.pvalue < 0.001:
+        pval = f"{results.pvalue:.2e}"
+    else:
+        pval = f"{results.pvalue:.3f}"
+    ax.text(1.05, 0.85-label_offset, 
+                f"{label}\n" +
+                f"    Slope: {results.slope:.3f}\n" +
+                f"    Intercept: {results.intercept:.3f}\n" +
+                f"    R: {results.rvalue:.3f}\n" +
+                f"    p: {pval}",
+                transform=ax.transAxes)
+
+    # label figure
+    if title is not None:
+        plt.title(title)
+    if xlabel is not None:
+        plt.xlabel(xlabel)
+    if ylabel is not None:
+        plt.ylabel(ylabel)
+        
+    # save/show figure
+    if not fname_out is None:
+        fig.savefig(fname_out)
+
