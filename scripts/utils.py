@@ -66,13 +66,16 @@ def load_odml_event_times(fname):
     return event_times
 
 
-def epoch_neo_segment(segment, reset_time=True):
-    """Split a Neo segment into epochs and reshape to 3D array.
+def epoch_neo_segment(segment, epochs, reset_time=True):
+    """Split a Neo segment into epochs and reshape to 3D numpy array
+    with conventional axis order (trials x channels x time).
 
     Parameters
     ----------
     segment : neo.Segment
         Neo segment object to be epoched. Must contain epochs.
+    epochs : neo.Epoch
+        Neo epoch object to be used for epoching.
     reset_time : bool, optional
         Whether to reset the time of the epochs to 0. The default is True.
     Returns
@@ -83,10 +86,9 @@ def epoch_neo_segment(segment, reset_time=True):
 
     # imports
     from neo.utils import cut_segment_by_epoch
-    from copy import copy
 
     # use Neo utils to epoch
-    seg_lst = cut_segment_by_epoch(copy(segment), segment.epochs[0], reset_time=reset_time)
+    seg_lst = cut_segment_by_epoch(segment, epochs, reset_time=reset_time)
 
     # Reformat to array
     signal_epoch = []
@@ -96,30 +98,6 @@ def epoch_neo_segment(segment, reset_time=True):
     # Reshape (trials x channels x time)
     signal_epoch = np.dstack(signal_epoch)
     signal_epoch = np.transpose(signal_epoch, axes=[2,1,0])
-
-    return signal_epoch
-
-
-def epoch_nix(fname):
-    """
-    Epochs a segment from a NIX file.
-
-    Parameters
-    ----------
-    fname : str
-        File name of the NIX file.
-
-    Returns
-    -------
-    signal_epoch: array
-        Array of epochs of shape (trials x channels x time).
-    """
-    
-    # Load nix
-    segment, _ = load_nix(fname)
-
-    # epoch
-    signal_epoch = epoch_neo_segment(segment)
 
     return signal_epoch
 

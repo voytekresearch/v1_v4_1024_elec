@@ -1,5 +1,7 @@
 '''
 Epoch LFP data.
+NOTE: this script is written for the RHS dataset; the other datasets have
+multiple lists of epochs within segement.epochs that must be considered.
 
 '''
 
@@ -10,7 +12,7 @@ import os
 # custom
 import sys
 sys.path.append("scripts")
-from utils import epoch_nix
+from utils import load_nix, epoch_neo_segment
 
 # settings
 PROJECT_PATH = 'G:/Shared drives/v1_v4_1024'
@@ -37,9 +39,13 @@ def main():
         # loop over files (arrays)
         files = os.listdir(path_in)
         for file in files :
+            # display progress
             print(f"\t{file}")
+
             # load and epoch data
-            lfp = epoch_nix(f"{path_in}/{file}")
+            segment, _ = load_nix(f"{path_in}/{file}")
+            lfp = epoch_neo_segment(segment, segment.epochs[0], 
+                                    reset_time=True)
 
             # extract pre- and post-stimulus epochs
             lfp_pre = lfp[..., IDX_ZERO-n_samples : IDX_ZERO]
