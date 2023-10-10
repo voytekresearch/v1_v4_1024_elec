@@ -4,19 +4,18 @@ Compute power spectral density (PSD).
 
 """
 
-# Imports
+# imports - general
 import numpy as np
 import os
 # from neurodsp.spectral import compute_spectrum
 from mne.time_frequency import psd_array_multitaper
 
+# imports - custom
+from info import *
+
 # Settings
-PROJECT_PATH = 'G:/Shared drives/v1_v4_1024/'
 SESSIONS = ['A_SNR_041018','A_SNR_140819','L_SNR_250717'] # List of essions to analyze
-FS = 500 # sampling frequency (Hz)
 # F_RANGE = None # frequency range for spectral analysis. None defaults to 2 cycles at lowest freq and Nyquist freq
-N_JOBS = -1 # number of jobs for parallel processing
-N_ARRAYS = 16 # number of arrays per session
 
 def main():
     # identify/create directories

@@ -3,17 +3,14 @@ Aggregate spectral parameters from all sessions into a dataframe.
 
 """
 
-# imports
+# imports - general
 import os
 import numpy as np
 import pandas as pd
 from fooof import FOOOFGroup
 
-# Settings
-PROJECT_PATH = 'G:/Shared drives/v1_v4_1024/'
-FS = 500 # sampling frequency (Hz)
-N_ARRAYS = 16
-N_CHANS = 64
+# imports - custom
+from info import *
 
 def main():
     # identify/create directories
