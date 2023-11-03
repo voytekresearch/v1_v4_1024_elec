@@ -5,20 +5,16 @@ multiple lists of epochs within segement.epochs that must be considered.
 
 '''
 
-# general
+# imports- general
 import numpy as np
 import os
 
-# custom
-import sys
-sys.path.append("scripts")
+# imports - custom
 from utils import load_nix, epoch_neo_segment
+from info import *
 
 # settings
-PROJECT_PATH = 'G:/Shared drives/v1_v4_1024'
 SESSIONS = ['A_SNR_041018','A_SNR_140819','L_SNR_250717'] # List of sessions to analyze
-FS = 500 # LFP sampling frequency (Hz)
-IDX_ZERO = 150 # index of zero in the lfp epoch (stimulus onset)
 DURATION = 0.3 # duration of pre-/post-stimulus epoch (s)
 
 def main():
