@@ -7,7 +7,7 @@ compute Spectral Parametrization for all files in a given folder (session)
 import os
 import numpy as np
 import pandas as pd
-from specparam import SpectralGroupModel, fit_models_3d
+from specparam import SpectralGroupModel, fit_models_3d, Bands
 
 # imports - custom
 from info import *
@@ -20,10 +20,15 @@ FREQ_RANGE = [1, 100]
 SPEC_PARAM_SETTINGS = {
     'peak_width_limits' :   [4, 20], # default: (0.5, 12.0)) - reccomends at least frequency resolution * 2
     'min_peak_height'   :   0.1, 
-    'max_n_peaks'       :   4, # (default: inf)
+    'max_n_peaks'       :   3, # (default: inf)
     'peak_threshold'    :   2.0, # (default: 2.0)
     'aperiodic_mode'    :   'knee',
     'verbose'           :   False}
+
+bands = Bands(
+    {'alpha'    :   [8, 16],
+    'beta'     :   [16, 40],
+    'gamma'    :   [40, 100]})
 
 def main():
     # identify/create directories
@@ -58,7 +63,7 @@ def main():
         fg.save(f"{path_out}/{fname_out}", save_results=True, save_settings=True)
         
         # create dataframe with all sessions combined
-        df_specparam = fg.to_df(SPEC_PARAM_SETTINGS['max_n_peaks'])
+        df_specparam = fg.to_df(bands)
 
         # get session IDs
         if i_file%2==0:
@@ -86,7 +91,7 @@ def main():
     
     # join results DFs across sessions and save
     dfs = pd.concat(dfs, ignore_index=True)
-    dfs.to_csv(fr'{PROJECT_PATH}/data/results/lfp_spectral_params.csv')
+    dfs.to_csv(fr'{PROJECT_PATH}/data/results/lfp_spectral_params_bands.csv')
 
 
 
