@@ -18,7 +18,7 @@ N_CHANS = 64
 AVERAGE_TRIALS = True # average across trials before fitting
 FREQ_RANGE = [1, 100] 
 SPEC_PARAM_SETTINGS = {
-    'peak_width_limits' :   [4, 20], # default: (0.5, 12.0)) - reccomends at least frequency resolution * 2
+    'peak_width_limits' :   [4, 100], # default: (0.5, 12.0)) - reccomends at least frequency resolution * 2
     'min_peak_height'   :   0.1, 
     'max_n_peaks'       :   3, # (default: inf)
     'peak_threshold'    :   2.0, # (default: 2.0)
