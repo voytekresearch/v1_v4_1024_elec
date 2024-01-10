@@ -209,6 +209,54 @@ def plot_schematic(data, odml_path, label=None, title=None, fname_out=None,
     if not fname_out is None:
         plt.savefig(fname_out, transparent=False)
 
+def plot_schematic_var(df, odml_path, var, y_label, dir_figs):
+    """
+    Plot multiple schematics for a list of variables
+
+    Parameters
+    ----------
+    df : dataFrame
+    odml_path : str
+        Path to odML file containing electrode metadata.
+    var : str
+      variable of interest
+    y_label : str
+      label for y-axis
+    dir_figs : str
+      directory to save figures
+    """
+
+    # get list of sessions and loop through
+    sessions = df['session'].unique()
+    for i_session, session in enumerate(sessions):
+        # display progress
+        print(f"    plotting session ({i_session+1}/{len(sessions)}): {session}")
+
+        # get data for session
+        df_session = df[df['session']==session]
+
+        # setting limits for colorbar
+        lims = np.append(df_session[f"{var}_pre"], df_session[f"{var}_post"])
+        maxli = np.nanmax(lims)
+        minli = np.nanmin(lims)
+        
+        # pre-stimulus
+        plot_schematic(df_session[f"{var}_pre"], odml_path, title=f"session: {session}", 
+                       label=f"pre-stimulus {y_label}", vmin=minli, vmax=maxli, 
+                       fname_out=f"{dir_figs}/{session}_{var}_pre.png");
+
+        # post-stimulus
+        plot_schematic(df_session[f"{var}_post"], odml_path, title=f"session: {session}", 
+                       label=f"post-stimulus {y_label}", vmin=minli, vmax=maxli, 
+                       fname_out=f"{dir_figs}/{session}_{var}_post.png");
+
+        # change in exponent
+        diff = df_session[f"{var}_post"] - df_session[f"{var}_pre"]
+        plot_schematic(diff, odml_path, norm_type="centered", title=f"session: {session}", 
+                       label=f"difference in {y_label}", vmin=np.nanmin(diff), vmax=np.nanmax(diff), 
+                       fname_out=f"{dir_figs}/{session}_{var}_diff.png");
+
+        plt.close('all')
 
 def plot_spectra_2conditions(spectra_a, spectra_b, freq, ax=None, shade_sem=True,
                              color=['grey','k'], labels=['baseline','encoding'],
