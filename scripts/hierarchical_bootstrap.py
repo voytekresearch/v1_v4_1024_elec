@@ -1,151 +1,174 @@
 # imports
 import numpy as np
-import pandas as pd
 
-# hierarchical bootstrap function
-
-def run_hierarchical_bootstrap(df, variable, condition, level_1, level_2, n_iterations=1000,
-                               verbose=True, plot=True):    
+def hierarchical_bootstrap(data_0, data_1, n_iter=1000, verbose=True, plot=True,
+                            **kwargs):
     """
-    Perform hierarchical bootstrap on data. 
-    
+    Perform hierarchical bootstrap. This function performs a hierarchical bootstrap
+    to test whether the means of two distributions are significantly different. This
+    function is based on Saravanan et al. 2020. The functionality has been extended
+    to allow for any number of hierarchical levels.
+
+    NOTE: a p-value of 0.5 indicates that the two distributions are identical; a
+    p-value close to 0 indicates that distributions_0 is greater than distributions_1;
+    and a p-value close to 1 indicates that distributions_1 is greater than distributions_0.
+
     Parameters
     ----------
-    df : pandas.DataFrame
-        Dataframe containing data to resample.
-    variable : str
-        Variable to resample.
-    condition : str
-        Experimental condition of interest.
-    level_1 : str
-        First level of hierarchy to resample.
-    level_2 : str
-        Second level of hierarchy to resample.
-    iterations : int
-        Number of iterations for resampling.
+    data_0, data_1 : array
+        Data arrays to be compared. Each dimension of the array represents a
+        hierarchical level. For example, the first dimension could represent
+        subjects, the seconds dimension could represent neurons, and the third
+        dimension could represent trials.
+    n_iter : int
+        Number of iterations for the bootstrap.
     verbose : bool
-        Whether to print p-value.
+        Whether to print the p-value.
     plot : bool
-        Whether to plot results.
+        Whether to plot the results.
+    **kwargs : dict
+        Additional keyword arguments for plotting.
 
     Returns
     -------
     p_value : float
-        p-value for difference between conditions.
-    distribution_0 : numpy.ndarray
-        Resampled distribution for condition 0.
-    distribution_1 : numpy.ndarray
-        Resampled distribution for condition 1.
+        p-value for the hierarchical bootstrap.
+    distribution_0, distribution_1 : array
+        Arrays containing the resampled means of each data array.
+    bin_edges : array
+        Array containing the bin edges for the joint probability matrix.
+    joint_prob : array
+        Array containing the joint probability matrix.
     """
 
-    # split groups
-    df_0, df_1 = _split_experimental_conditions(df, condition)
-
-    # run bootstrap
-    distribution_0 = _hierarchical_bootstrap(df_0, variable, level_1, level_2, n_iterations)
-    distribution_1 = _hierarchical_bootstrap(df_1, variable, level_1, level_2, n_iterations)
+    # get bootstrap samples
+    distribution_0 = _get_bootstrap_distribution(data_0, n_iter=n_iter)
+    distribution_1 = _get_bootstrap_distribution(data_1, n_iter=n_iter)
 
     # compute p-value
-    diff = distribution_1 - distribution_0
-    p_value = min(np.sum(diff > 0), np.sum(diff < 0)) / len(diff)
+    p_value, joint_prob, bin_edges = _compute_p_boot(distribution_0, distribution_1)
 
-    # compute p-boot 
-    p_boot, joint_prob, bin_edges = _compute_p_boot(distribution_0, distribution_1)
-
-    # print/plot results    
+    # print results
     if verbose:
-        print(f"p-value: {p_value}")
-        print(f"p-boot: {p_boot}")
+        print(f'\np-value: {p_value:0.3f}')
+
+    # plot results
     if plot:
-        _plot_bootstrap_results(df, variable, condition, distribution_0, distribution_1,
-                               joint_prob, bin_edges)
+        _plot_bootstrap_results(data_0, data_1, distribution_0, distribution_1,
+                                bin_edges, joint_prob, **kwargs)
 
-    # return p_value, distribution_0, distribution_1
-    return p_value, p_boot, joint_prob, bin_edges, distribution_0, distribution_1
+    return p_value, distribution_0, distribution_1, bin_edges, joint_prob  
 
-
-def _split_experimental_conditions(df, condition):
+def _get_bootstrap_distribution(data, n_iter=1000):
     """
-    Split dataframe into two groups based on experimental condition.
-    """
+    Get distribution of resampled means for hierarchical bootstrap. This function
+    resamples the data array and computes the mean for each iteration of the
+    bootstrap.
 
-    # check that there are only two experimental conditions
-    conditions = df[condition].unique()
-    if len(conditions) != 2:
-        raise ValueError("More than two experimental conditions detected.")
-        
-
-    # split dataframe by experimental condition
-    df_0 = df.loc[df[condition]==conditions[0]]
-    df_1 = df.loc[df[condition]==conditions[1]]
-
-    return df_0, df_1
-
-
-def _hierarchical_bootstrap(df, variable, level_1, level_2, iterations):
-    """
-    Perform hierarchical bootstrap on data. 
-    
     Parameters
     ----------
-    df : pandas.DataFrame
-        Dataframe containing data to resample.
-    variable : str
-        Variable to resample.
-    level_1 : str
-        First level of hierarchy to resample.
-    level_2 : str
-        Second level of hierarchy to resample.
-    iterations : int
-        Number of iterations for resampling.
+    data : array
+        Data array to be resampled.
+    n_iter : int
+        Number of iterations.
 
     Returns
     -------
-    distribution : numpy.ndarray
-        Resampled distribution.
-
+    distribution : array
+        Array contianing the mean of each resampling iteration.
     """
 
-    # get cluster info
-    clusters = df[level_1].unique()
-    n_clusters = len(clusters)
-
-    # count number of instances per cluster
-    instances_per_cluster = np.zeros(n_clusters)
-    for i_cluster, cluster_i in enumerate(clusters):
-        instances_per_cluster[i_cluster] = len(df.loc[df[level_1]==cluster_i, level_2].unique())
-    n_instances = int(np.nanmean(instances_per_cluster)) # use average number of instances per cluster
-
-    # loop through iterations
-    distribution = np.zeros(iterations)
-    for i_iteration in range(iterations):
-        # Resample level 2 
-        clusters_resampled = np.random.choice(clusters, size=n_clusters)
-
-        # resample level 3 and get data for each cluster
-        values = []
-        for i_cluster, cluster_i in enumerate(clusters_resampled):
-            # resample level 3
-            instances = df.loc[df[level_1]==cluster_i, level_2].unique()
-            instances_resampled = np.random.choice(instances, size=n_instances)
-
-            # get data for each instance within cluster and average
-            for i_instance, instance_i in enumerate(instances_resampled):
-                value = df.loc[(df[level_1]==cluster_i) & (df[level_2]==instance_i), variable].values[0]
-                values.append(value)
-
-        # compute average for iteration
-        distribution[i_iteration] = np.nanmean(values)
+    distribution = np.zeros(n_iter)
+    for i_iter in range(n_iter):
+        resampled_data = _resample_data(data)
+        distribution[i_iter] = np.mean(resampled_data)
 
     return distribution
+        
+def _resample_data(data):
+    """
+    Resample data for hierarchical bootstrap. This function is used to resample
+    the data array for each iteration of the bootstrap.
 
+    Parameters
+    ----------
+    data : array
+        Data array to be resampled.
+
+    Returns
+    -------
+    resampled_data : array
+        Resampled data array.
+    """
+
+    # init resampled indices
+    n_dims = np.ndim(data)
+    resampled_indices = np.zeros([*data.shape, n_dims], dtype=int)
+
+    # get indices for resampling
+    for i_level in range(n_dims):
+        indices = _get_resampling_indices(data.shape[:-1], data.shape[i_level])
+        resampled_indices[..., i_level] = indices
+
+    # resample data 
+    indices_tuple = tuple(resampled_indices[..., i] for i in range(n_dims))
+    resampled_data = data[indices_tuple]
+
+    return resampled_data
+
+
+def _get_resampling_indices(shape, range):
+    """
+    Get resampling indices for hierarchical bootstrap. These indices are used to
+    resample the data array.
+    
+    Parameters
+    ----------
+    shape : tuple
+        Shape of data array.
+    range : int
+        Range of indices to sample from.
+
+    Returns
+    -------
+    indices : array
+        Array of resampled indices.
+    """
+
+    rng = np.random.default_rng()
+    indices = rng.choice(range, size=shape, replace=True)
+    indices = indices.astype(int)
+
+    return indices
 
 def _compute_p_boot(distribution_0, distribution_1, n_bins=30):    
     '''
-    Compute p-value for difference between two distributions.
-    This function is based on Saravanan et al. 2020.
-    Source: https://github.com/soberlab/Hierarchical-Bootstrap-Paper/blob/master/Bootstrap%20Paper%20Simulation%20Figure%20Codes.ipynb
+    Compute the p-value for the hierarchical bootstrap. This function computes
+    the joint probability of the two distributions and then sums the upper
+    triangle of the joint probability matrix to get the p-value. A p-value of
+    0.5 indicates that the two distributions are identical; a p-value close to 0
+    indicates that distributions_0 is greater than distributions_1; and a p-value
+    close to 1 indicates that distributions_1 is greater than distributions_0.
+
+    This function is based on Saravanan et al. 2020 (https://github.com/soberlab/Hierarchical-Bootstrap-Paper)
+
+    Parameters
+    ----------
+    distribution_0, distribution_1  : array
+        Array containing the resampled means of each distribution.
+    n_bins : int
+        Number of bins for the joint probability matrix.
+
+    Returns
+    -------
+    p_value : float
+        p-value for the hierarchical bootstrap.
+    joint_prob : array
+        Array containing the joint probability matrix.
+    bin_edges : array
+        Array containing the bin edges for the joint probability matrix.
     '''
+
     # calculate probabilities for each distribution
     all_values = np.concatenate([distribution_0, distribution_1])
     bin_edges = np.linspace(np.min(all_values), np.max(all_values), n_bins)
@@ -164,33 +187,44 @@ def _compute_p_boot(distribution_0, distribution_1, n_bins=30):
     return p_value, joint_prob, bin_edges
 
 
-def _plot_bootstrap_results(df, variable, condition, distribution_0, distribution_1,
-                           joint_prob, bin_edges):
+def _plot_bootstrap_results(data_0, data_1, distribution_0, distribution_1,
+                           bin_edges, joint_prob, labels=['0', '1'],
+                           colors=["#d8b365", "#5ab4ac"]):
     """
-    Plot bootstrap results. PLotting function for run_hierarchical_bootstrap().
+    Plot bootstrap results. Plotting function for hierarchical_bootstrap().
+
+    NOTE: the joint probability matrix is plotted using pcolormesh(),
+    so the direction of the y axes is reversed, and the upper triangle of the
+    matrix appears in the lower right corner of the plot.
     """
 
     # imports
     import matplotlib.pyplot as plt
 
     # create figure
-    fig, (ax1, ax2) = plt.subplots(1,2, figsize=(12,4))
+    fig, (ax0, ax1, ax2) = plt.subplots(1,3, figsize=(18,4))
 
-    # ax1: plot distributions
-    conditions = df[condition].unique()
-    ax1.hist(distribution_0, bins=bin_edges, color='k', alpha=0.5, label=conditions[0])
-    ax1.hist(distribution_1, bins=bin_edges, color='b', alpha=0.5, label=conditions[1])
-    ax1.set_xlabel(variable)
+    # ax0: plot orignal distributions
+    bin_edges_ = np.linspace(np.min([data_0, data_1]), np.max([data_0, data_1]), 30)
+    ax0.hist(data_0.ravel(), bins=bin_edges_, color=colors[0], alpha=0.5, label=labels[0])
+    ax0.hist(data_1.ravel(), bins=bin_edges_, color=colors[1], alpha=0.5, label=labels[1])
+    ax0.set_xlabel('value')
+    ax0.set_ylabel('count')
+    ax0.set_title('Original dataset')
+
+    # ax1: plot resampled distributions
+    ax1.hist(distribution_0, bins=bin_edges, color=colors[0], alpha=0.8, label=labels[0])
+    ax1.hist(distribution_1, bins=bin_edges, color=colors[1], alpha=0.8, label=labels[1])
+    ax1.set_xlabel('value')
     ax1.set_ylabel('count')
-    ax1.set_title('Bootstrap results')
+    ax1.set_title('Bootstrap distributions')
     ax1.legend()
 
     # ax2: plot joint probability
     im = ax2.pcolormesh(bin_edges, bin_edges, joint_prob, cmap='hot')
-    ax2.set_xlabel(conditions[0])
-    ax2.set_ylabel(conditions[1])
+    ax2.set_ylabel(labels[0])
+    ax2.set_xlabel(labels[1])
     ax2.set_title('Joint probability')
     fig.colorbar(im, ax=ax2)
-
+    
     plt.show()
-
