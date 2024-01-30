@@ -107,7 +107,7 @@ def _resample_data(data):
 
     # get indices for resampling
     for i_level in range(n_dims):
-        indices = _get_resampling_indices(data.shape[:-1], data.shape[i_level])
+        indices = _get_resampling_indices(data.shape, data.shape[i_level])
         resampled_indices[..., i_level] = indices
 
     # resample data 
