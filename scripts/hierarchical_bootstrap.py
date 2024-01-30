@@ -1,6 +1,61 @@
 # imports
 import numpy as np
 
+
+def prep_data(df, feature, condition, levels):
+    """
+    Prepares data for hierarchical bootstrap.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing data. Columns must include:
+            - feature
+            - condition
+            - levels
+    feature : str
+        Feature of interest. These values will be compared between conditions.
+    condition : str
+        Condition of interest. Must have exactly two conditions.
+    levels : list
+        List of hierarchical levels. For example, if the data is organized by
+        subject, neuron, and trial, then levels = ['subject', 'neuron', 'trial'].
+
+    Returns
+    -------
+    data_0, data_1 : array
+        Data arrays to be compared. Each dimension of the array represents a
+        hierarchical level. For example, the first dimension could represent
+        subjects, the seconds dimension could represent neurons, and the third
+        dimension could represent trials.
+    
+    """
+    # seperate conditions of interest (must be two)
+    conditions = df[condition].unique()
+    if len(conditions) != 2:
+        raise ValueError('More/less than two conditions detected. Please check your data.')
+    df_0 = df[df[condition] == conditions[0]]
+    df_1 = df[df[condition] == conditions[1]]
+
+    # get instances of each level
+    level_instances = dict()
+    for i, level in enumerate(levels):
+        level_instances[level] = df_0[level].unique()
+
+    # initialize each output array
+    data_0 = np.zeros(tuple([len(df_0[level].unique()) for level in levels]))
+    data_1 = np.zeros(tuple([len(df_1[level].unique()) for level in levels]))
+
+    # fill arrays with feature values
+    for row_0, row_1 in zip(df_0.itertuples(), df_1.itertuples()):
+        idx_0 = tuple([np.where(level_instances[level] == getattr(row_0, level))[0][0] for i, level in enumerate(levels)])
+        idx_1 = tuple([np.where(level_instances[level] == getattr(row_1, level))[0][0] for i, level in enumerate(levels)])
+        data_0[idx_0] = getattr(row_0, feature)
+        data_1[idx_1] = getattr(row_1, feature)
+
+    return data_0, data_1
+
+
 def hierarchical_bootstrap(data_0, data_1, n_iter=1000, verbose=True, plot=True,
                             **kwargs):
     """
