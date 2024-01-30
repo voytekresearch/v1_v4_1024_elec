@@ -57,7 +57,7 @@ def prep_data(df, feature, condition, levels):
 
 
 def hierarchical_bootstrap(data_0, data_1, n_iter=1000, verbose=True, plot=True,
-                            **kwargs):
+                            fname_out=None, **kwargs):
     """
     Perform hierarchical bootstrap. This function performs a hierarchical bootstrap
     to test whether the means of two distributions are significantly different. This
@@ -110,7 +110,7 @@ def hierarchical_bootstrap(data_0, data_1, n_iter=1000, verbose=True, plot=True,
     # plot results
     if plot:
         _plot_bootstrap_results(data_0, data_1, distribution_0, distribution_1,
-                                bin_edges, joint_prob, **kwargs)
+                                bin_edges, joint_prob, fname_out, **kwargs)
 
     return p_value, distribution_0, distribution_1, bin_edges, joint_prob  
 
@@ -243,7 +243,7 @@ def _compute_p_boot(distribution_0, distribution_1, n_bins=30):
 
 
 def _plot_bootstrap_results(data_0, data_1, distribution_0, distribution_1,
-                           bin_edges, joint_prob, labels=['0', '1'],
+                           bin_edges, joint_prob, fname_out=None, labels=['0', '1'],
                            colors=["#d8b365", "#5ab4ac"]):
     """
     Plot bootstrap results. Plotting function for hierarchical_bootstrap().
@@ -281,5 +281,10 @@ def _plot_bootstrap_results(data_0, data_1, distribution_0, distribution_1,
     ax2.set_xlabel(labels[1])
     ax2.set_title('Joint probability')
     fig.colorbar(im, ax=ax2)
+
+    # save figure
+    if not fname_out is None:
+        plt.savefig(fname_out, transparent=False)
+
     
     plt.show()
