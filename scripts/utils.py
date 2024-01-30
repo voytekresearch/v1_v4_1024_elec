@@ -260,3 +260,30 @@ def trim_signal(signal, time, epoch, dim=None):
     signal = signal[..., mask]        
 
     return signal, time
+
+
+def knee_freq(knee, exponent):
+    """
+    Convert specparam knee parameter to Hz.
+
+    Parameters
+    ----------
+    knee, exponent : 1D array
+        Knee and exponent parameters from specparam.
+
+    Returns
+    -------
+    knee_hz : 1D array
+        Knee in Hz.
+    """
+    
+    # check if input is float or array
+    if isinstance(knee, float):
+        knee_hz = knee**(1/exponent)
+
+    else:
+        knee_hz = np.zeros_like(knee)
+        for ii in range(len(knee)):
+            knee_hz[ii] = knee[ii]**(1/exponent[ii])
+        
+    return knee_hz
