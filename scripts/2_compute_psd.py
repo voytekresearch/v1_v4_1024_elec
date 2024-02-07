@@ -55,16 +55,15 @@ def main():
         print(f"    Aggregating results across arrays...")
         n_trials, n_channels, n_freqs, n_times = tfr.shape
         spec_shape = [n_trials, n_channels*N_ARRAYS, n_freqs, n_times]
-        for epoch in ['pre', 'post']:
-            spectrogram = np.zeros(spec_shape)
-            for i_array in range(N_ARRAYS):
-                nsp_idx = int(np.ceil((i_array+1)/2))
-                data_in = np.load(fr"{path_out}\NSP{nsp_idx}_array{i_array+1}_LFP_{epoch}.npz")
-                tfr_i = data_in['tfr']
-                spectrogram[:, i_array*tfr_i.shape[1]:(i_array+1)*tfr_i.shape[1]] = tfr_i
+        spectrogram = np.zeros(spec_shape)
+        for i_array in range(N_ARRAYS):
+            nsp_idx = int(np.ceil((i_array+1)/2))
+            data_in = np.load(fr"{path_out}\NSP{nsp_idx}_array{i_array+1}_LFP.npz")
+            tfr_i = data_in['tfr']
+            spectrogram[:, i_array*tfr_i.shape[1]:(i_array+1)*tfr_i.shape[1]] = tfr_i
 
-            # save results
-            np.savez(f"{path_out_j}/{session}_lfp_{epoch}.npz", spectrogram=spectrogram, freq=freq)
+        # save results
+        np.savez(f"{path_out_j}/{session}_lfp.npz", spectrogram=spectrogram, freq=freq)
 
 
 if __name__ == "__main__":
