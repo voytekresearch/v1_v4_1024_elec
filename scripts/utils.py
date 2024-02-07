@@ -287,3 +287,38 @@ def knee_freq(knee, exponent):
             knee_hz[ii] = knee[ii]**(1/exponent[ii])
         
     return knee_hz
+
+
+def compute_tfr(lfp, fs, freqs, freq_spacing='lin', time_window_length=0.5, 
+                freq_bandwidth=4, n_jobs=-1, decim=1, output='power', 
+                verbose=False):
+    """
+    Compute time-frequency representation (TFR) of LFP data.
+
+    Parameters
+    ----------
+    lfp : 3d array
+        LFP data (trials x channels x samples).
+    fs : int
+        Sampling frequency.
+    freqs : 1d array
+        Frequency vector (start, stop, n_freqs).
+    """
+
+    # imports
+    from mne.time_frequency import tfr_array_multitaper
+
+    # define hyperparameters
+    if freq_spacing == 'lin':
+        freq = np.linspace(*freqs)
+    elif freq_spacing == 'log':
+        freq = np.logspace(*np.log10(freqs[:2]), freqs[2])
+    n_cycles = freq * time_window_length # set n_cycles based on fixed time window length
+    time_bandwidth =  time_window_length * freq_bandwidth # must be >= 2
+
+    # TF decomposition using multitapers
+    tfr = tfr_array_multitaper(lfp, sfreq=fs, freqs=freq, n_cycles=n_cycles, 
+                                time_bandwidth=time_bandwidth, output=output, 
+                                n_jobs=n_jobs, decim=decim, verbose=verbose)
+
+    return tfr, freq
