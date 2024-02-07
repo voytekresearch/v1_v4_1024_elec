@@ -10,7 +10,8 @@ import pandas as pd
 from fooof import FOOOFGroup
 
 # imports - custom
-from info import *
+from info import N_ARRAYS, N_CHANS
+from paths import PROJECT_PATH
 
 def main():
     # identify/create directories
