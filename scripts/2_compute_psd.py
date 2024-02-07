@@ -9,7 +9,7 @@ import numpy as np
 import os
 
 # imports - custom
-from paths import PROJECT_PATH, EXTERNAL_PATH
+from paths import EXTERNAL_PATH
 from info import SESSIONS, FS, EPOCH_TIMES, N_JOBS, N_ARRAYS, N_CHANS
 from utils import compute_tfr
 
@@ -28,7 +28,7 @@ def main():
         print(f"\nAnalyzing session: {session}")
 
         # identify/create directories
-        path_in = f'{PROJECT_PATH}/data/lfp/lfp_epochs/{session}'
+        path_in = f'{EXTERNAL_PATH}/data/lfp/lfp_epochs/{session}'
         path_out = f'{EXTERNAL_PATH}/data/lfp/lfp_tfr/{session}'
         if not os.path.exists(path_out): os.makedirs(path_out)
             

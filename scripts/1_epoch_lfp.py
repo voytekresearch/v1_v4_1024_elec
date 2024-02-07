@@ -13,7 +13,7 @@ import os
 # imports - custom
 from utils import load_nix, epoch_neo_segment
 from info import SESSIONS
-from paths import PROJECT_PATH
+from paths import EXTERNAL_PATH
 
 def main():
     # loop over sessions
@@ -22,8 +22,8 @@ def main():
         print(f"\nAnalyzing session: {session}")
 
         # identify/create directories
-        path_in = f'{PROJECT_PATH}/data/dataset/{session}/lfp/nix'
-        path_out = f'{PROJECT_PATH}/data/lfp/lfp_epochs/{session}'
+        path_in = f'{EXTERNAL_PATH}/data/dataset/{session}/lfp/nix'
+        path_out = f'{EXTERNAL_PATH}/data/lfp/lfp_epochs/{session}'
         if not os.path.exists(path_out):
             os.makedirs(path_out)
 

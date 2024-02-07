@@ -11,12 +11,12 @@ from fooof import FOOOFGroup
 
 # imports - custom
 from info import N_ARRAYS, N_CHANS
-from paths import PROJECT_PATH
+from paths import EXTERNAL_PATH
 
 def main():
     # identify/create directories
-    path_in = f'{PROJECT_PATH}/data/lfp/lfp_params'
-    path_out = f'{PROJECT_PATH}/data/results'
+    path_in = f'{EXTERNAL_PATH}/data/lfp/lfp_params'
+    path_out = f'{EXTERNAL_PATH}/data/results'
     if not os.path.exists(path_out): os.makedirs(path_out)
 
     # get session IDs
