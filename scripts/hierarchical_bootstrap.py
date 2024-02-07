@@ -1,5 +1,9 @@
 # imports
 import numpy as np
+import os
+import sys
+sys.path.append("../")
+from scripts.info import *
 
 
 def prep_data(df, feature, condition, levels):
@@ -57,7 +61,7 @@ def prep_data(df, feature, condition, levels):
 
 
 def hierarchical_bootstrap(data_0, data_1, n_iter=1000, verbose=True, plot=True,
-                            fname_out=None, **kwargs):
+                            **kwargs):
     """
     Perform hierarchical bootstrap. This function performs a hierarchical bootstrap
     to test whether the means of two distributions are significantly different. This
@@ -110,9 +114,66 @@ def hierarchical_bootstrap(data_0, data_1, n_iter=1000, verbose=True, plot=True,
     # plot results
     if plot:
         _plot_bootstrap_results(data_0, data_1, distribution_0, distribution_1,
-                                bin_edges, joint_prob, fname_out, **kwargs)
+                                bin_edges, joint_prob, **kwargs)
 
     return p_value, distribution_0, distribution_1, bin_edges, joint_prob  
+
+
+def multivar_hierarchical_bootstrap(df, vars, fname_out=None, **kwargs):
+    """
+    Prepares data and performs hierarchical bootstrap for an array of variables testing whether the
+    means of two distributions are significantly different for each variable.
+
+     Parameters
+    ----------
+    df : DataFrame
+        Containing LFP spectral parameter results.
+    vars: list
+        Variables that will be measured.
+    fname_out : str
+        Path to save figure to. If None, figure is not saved.
+    **kwargs : dict
+        Additional keyword arguments for plotting.
+
+     Returns
+    -------
+    p_value : float
+        p-value for the hierarchical bootstrap.
+    distribution_0, distribution_1 : array
+        Arrays containing the resampled means of each data array.
+    bin_edges : array
+        Array containing the bin edges for the joint probability matrix.
+    joint_prob : array
+        Array containing the joint probability matrix.
+    """
+    for v in vars:
+        print(f"Analyzing: \t{v}")
+
+        # add subject column
+        df['subject'] = df['session'].str[0]
+
+        # seperate conditions (pre/post)
+        df_0 = df[df['epoch'] == 'pre']
+        df_1 = df[df['epoch'] == 'post']
+
+        # create each array
+        data_0 = np.zeros((len(df_0['subject'].unique()), N_ARRAYS, len(df_0['channel'].unique())))
+        data_1 = np.zeros((len(df_1['subject'].unique()), N_ARRAYS, len(df_1['channel'].unique())))
+
+
+        # fill arrays
+        for i, subject in enumerate(df_0['subject'].unique()):
+            for j, array in enumerate(df_0[df_0['subject'] == subject]['array'].unique()):
+                for k, channel in enumerate(df_0[(df_0['subject'] == subject) & (df_0['array'] == array)]['channel'].unique()):
+                    data_0[i, j, k] = df_0.loc[(df_0['subject'] == subject) & (df_0['array'] == array) & (df_0['channel'] == channel), v].values[0]
+                    data_1[i, j, k] = df_1.loc[(df_1['subject'] == subject) & (df_1['array'] == array) & (df_1['channel'] == channel), v].values[0]
+        
+        # perform hierarchical bootstrap
+        if not fname_out is None:
+            hierarchical_bootstrap(data_0=data_0, data_1=data_1, fname_out=f'{fname_out}/{v}_boot_distribution.png', title=v)
+        else: 
+            print('Figure was not saved, add path to fname_out if you want to save fig.')
+
 
 def _get_bootstrap_distribution(data, n_iter=1000):
     """
@@ -243,7 +304,7 @@ def _compute_p_boot(distribution_0, distribution_1, n_bins=30):
 
 
 def _plot_bootstrap_results(data_0, data_1, distribution_0, distribution_1,
-                           bin_edges, joint_prob, fname_out=None, labels=['0', '1'],
+                           bin_edges, joint_prob, fname_out=None, title=None, labels=['0', '1'],
                            colors=["#d8b365", "#5ab4ac"]):
     """
     Plot bootstrap results. Plotting function for hierarchical_bootstrap().
@@ -284,6 +345,7 @@ def _plot_bootstrap_results(data_0, data_1, distribution_0, distribution_1,
 
     # save figure
     if not fname_out is None:
+        fig.suptitle(f'{title}')
         plt.savefig(fname_out, transparent=False)
 
     
