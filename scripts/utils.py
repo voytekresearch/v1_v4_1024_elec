@@ -262,8 +262,9 @@ def trim_signal(signal, time, epoch, dim=None):
     return signal, time
 
 
-def compute_tfr(lfp, fs, freqs, freq_spacing='lin', time_window_length=0.5, freq_bandwidth=4, 
-                n_jobs=-1, decim=1, verbose=False):
+def compute_tfr(lfp, fs, freqs, freq_spacing='lin', time_window_length=0.5, 
+                freq_bandwidth=4, n_jobs=-1, decim=1, output='power', 
+                verbose=False):
     """
     Compute time-frequency representation (TFR) of LFP data.
 
@@ -290,7 +291,7 @@ def compute_tfr(lfp, fs, freqs, freq_spacing='lin', time_window_length=0.5, freq
 
     # TF decomposition using multitapers
     tfr = tfr_array_multitaper(lfp, sfreq=fs, freqs=freq, n_cycles=n_cycles, 
-                                time_bandwidth=time_bandwidth, output='power', n_jobs=n_jobs,
-                                decim=decim, verbose=verbose)
+                                time_bandwidth=time_bandwidth, output=output, 
+                                n_jobs=n_jobs, decim=decim, verbose=verbose)
 
     return tfr, freq
