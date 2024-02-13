@@ -1,42 +1,35 @@
 """
-compute Spectral Parametrization for a given session. 
+Apply SpecParam for a given session. Spectrogram is averaged over time for the
+entire trial and then parameterized.
 
 """
 
-# imports
-import numpy as np
-from fooof import FOOOFGroup
-
-# Dataset details
-FS = 500 # sampling frequency (Hz)
-N_ARRAYS = 16 # number of arrays
-N_CHANNELS = 64 # number of channels per array
+# SET: session to analyze
 SESSIONS = 'A_SNR_140819'
 
-# settings
-PATH = 'G:/Shared drives/v1_v4_1024/'
+# imports
+import numpy as np
+from specparam import SpectralGroupModel
 
-# analysis settings
-F_RANGE = [1, FS/2] # frequency range for spectral analysis - skip freq=0
+# imports - custom
+from paths import EXTERNAL_PATH
+from settings import SPECPARAM_SETTINGS, N_JOBS
 
 def main():
     # load example file
-    fname_in = PATH + f'data/results/{SESSIONS}_lfp_spectra.npz'
+    fname_in = f"{EXTERNAL_PATH}/data/lfp/lfp_tfr/sessions/{SESSIONS}_lfp.npz"
     data_in = np.load(fname_in)
     
-    # removing nan channels
-    psd = psd = data_in['psd'][~(data_in['psd'] == 0).all(axis=1)]
+    # average over time
+    tfr = np.mean(data_in['tfr'], axis=-1)
 
-    #setting up our model
-    specparam_sets = {'peak_width_limits': [2, 8], 'min_peak_height': 0.1}
-    freq_range = [1, 40]
-    fg = FOOOFGroup(**specparam_sets)
-
-    fg.fit(data_in['freq'], psd, freq_range=freq_range)
+    # parameterize spectra
+    sm = SpectralGroupModel(**SPECPARAM_SETTINGS)
+    sm.fit(data_in['freq'], tfr, n_jobs=N_JOBS)
 
     # save results
     fname_out = fname_in.replace('spectra.npz', 'params')
-    fg.save(fname_out, save_results = True, save_settings = True)
+    sm.save(fname_out, save_results=True, save_settings=True)
 
 if __name__ == "__main__":
     main()
