@@ -22,14 +22,15 @@ def main():
         print(f"\nAnalyzing session: {session}")
 
         # identify/create directories
-        path_in = f'{EXTERNAL_PATH}/data/dataset/{session}/lfp/nix'
+        path_in = f'{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/lfp'
         path_out = f'{EXTERNAL_PATH}/data/lfp/lfp_epochs/{session}'
         if not os.path.exists(path_out):
             os.makedirs(path_out)
 
         # loop over files (arrays; 16 per session)
         files = os.listdir(path_in)
-        for file in files :
+        files = [f for f in files if f.endswith('.nix')]
+        for file in files:
             # display progress
             print(f"\t{file}")
 
