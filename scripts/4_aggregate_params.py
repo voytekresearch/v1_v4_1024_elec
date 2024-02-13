@@ -7,7 +7,7 @@ Aggregate spectral parameters from all sessions into a dataframe.
 import os
 import numpy as np
 import pandas as pd
-from fooof import FOOOFGroup
+from specparam import SpectralGroupModel
 
 # imports - custom
 from info import N_ARRAYS, N_CHANS
@@ -42,13 +42,13 @@ def main():
             df_sess['epoch'] = epoch
             
             # import data
-            fg = FOOOFGroup()
-            fg.load(fr"G:\Shared drives\v1_v4_1024\data\lfp\lfp_params\{session}_lfp_{epoch}.json")
+            sm = SpectralGroupModel()
+            sm.load(fr"G:\Shared drives\v1_v4_1024\data\lfp\lfp_params\{session}_lfp_{epoch}.json")
 
             # add exponent and r-squared to dataframe
             for ap_param in ['offset', 'knee', 'exponent']:
-                df_sess[ap_param] = fg.get_params('aperiodic_params', ap_param)
-            df_sess[f'r2'] = fg.get_params('r_squared')
+                df_sess[ap_param] = sm.get_params('aperiodic_params', ap_param)
+            df_sess[f'r2'] = sm.get_params('r_squared')
             
             # add to list
             dfs.append(df_sess)
