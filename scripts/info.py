@@ -13,12 +13,12 @@ N_CHANS = 64 # number of channels per array
 # analysis settings
 N_JOBS = -1 # number of jobs for parallel processing
 SPEC_PARAM_SETTINGS = {
-    'peak_width_limits' :   [4, 100], # default: (0.5, 12.0)) - reccomends at least frequency resolution * 2
-    'min_peak_height'   :   0.1, 
-    'max_n_peaks'       :   3, # (default: inf)
-    'peak_threshold'    :   2.0, # (default: 2.0)
-    'aperiodic_mode'    :   'knee',
-    'verbose'           :   False}
+    'peak_width_limits' :   [2, 12],    # (default: (0.5, 12.0)) should be >= 2*frequency_resolution
+    'min_peak_height'   :   0.1,        # (default: 0.0)
+    'max_n_peaks'       :   3,          # (default: inf)
+    'peak_threshold'    :   2.0,        # (default: 2.0)
+    'aperiodic_mode'    :   'knee',     # (default: 'fixed')
+    'verbose'           :   False}      # (default: True)
 
 BANDS = {
     'alpha'    :   [8, 16],
