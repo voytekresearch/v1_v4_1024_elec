@@ -11,7 +11,8 @@ from specparam import SpectralGroupModel, Bands
 
 # imports - custom
 from paths import EXTERNAL_PATH
-from info import N_ARRAYS, N_CHANS, N_JOBS, BANDS, SPECPARAM_SETTINGS
+from info import N_ARRAYS, N_CHANS
+from settings import N_JOBS, BANDS, SPECPARAM_SETTINGS
 
 def main():
     # identify/create directories

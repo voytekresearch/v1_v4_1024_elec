@@ -10,12 +10,9 @@ import os
 
 # imports - custom
 from paths import EXTERNAL_PATH
-from info import SESSIONS, FS, EPOCH_TIMES, N_JOBS, N_ARRAYS, N_CHANS
+from info import SESSIONS, FS, EPOCH_TIMES, N_ARRAYS, N_CHANS
+from settings import N_JOBS, FREQS, FREQ_SPACING
 from utils import compute_tfr
-
-# Settings
-FREQS = [4, 100, 128] # Frequency vector (start, stop, n_freqs)
-FREQ_SPACING = 'lin' # Frequency spacing ('lin' or 'log')
 
 def main():
     # identify/create directories
