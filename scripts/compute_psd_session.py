@@ -34,7 +34,7 @@ def comp_epoch_psd(session):
     """
 
     # initialize variables (i.e. create empty arrays to be filled with results for each file)
-    data_in = loadmat(f'{PATH}/data/{session}/lfp/NSP1_array1_LFP.mat')
+    data_in = loadmat(PATH + f'data/{session}/lfp/NSP1_array1_LFP.mat')
     freq, _ = compute_spectrum(data_in['lfp'].T, FS, f_range=F_RANGE)
     duration = len(data_in['lfp']) / FS
     n_epochs = int(np.floor(duration/EPOCH_LENGTH))
@@ -46,7 +46,7 @@ def comp_epoch_psd(session):
 
 
         # import data
-        fname_in = f'{PATH}/data/{session}/lfp/NSP{idx_nsp}_array{i_array}_LFP.mat'
+        fname_in = f'{PATH}data/{session}/lfp/NSP{idx_nsp}_array{i_array}_LFP.mat'
         data_in = loadmat(fname_in)
 
         # loop through epochs
@@ -72,7 +72,7 @@ def comp_session_psd(session):
     """
 
     # initialize variables (i.e. create empty arrays to be filled with results for each file)
-    data_in = loadmat(f'{PATH}/data/{session}/lfp/NSP1_array1_LFP.mat')
+    data_in = loadmat(PATH + f'data/{session}/lfp/NSP1_array1_LFP.mat')
     freq, _ = compute_spectrum(data_in['lfp'].T, FS, f_range=F_RANGE)
     psd = np.zeros([N_ARRAYS*N_CHANS, len(freq)]) # shape: n channels (1024) x n frequencies 
     psd_array = np.zeros([N_ARRAYS, len(freq)]) #psd per array
@@ -85,7 +85,7 @@ def comp_session_psd(session):
         print(f"Analyzing file#: \t{i_array}")
 
         # import data
-        fname_in = f'{PATH}/data/{session}/lfp/NSP{idx_nsp}_array{i_array}_LFP.mat'
+        fname_in = PATH + f'data/{session}/lfp/NSP{idx_nsp}_array{i_array}_LFP.mat'
         data_in = loadmat(fname_in)
 
         # compute power spectrum
@@ -98,7 +98,7 @@ def comp_session_psd(session):
             idx_nsp += 1
 
     # save results
-    np.savez(f'{PATH}/data/results/{session}_lfp_spectra', psd=psd, freq=freq, 
+    np.savez(PATH + f'/data/results/{session}_lfp_spectra', psd=psd, freq=freq, 
              psd_array=psd_array) 
 
 
