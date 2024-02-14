@@ -4,6 +4,7 @@ pandas
 matplotlib
 seaborn
 mne
+joblib
 neo
 odml
 specparam
