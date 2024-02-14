@@ -102,6 +102,32 @@ def epoch_neo_segment(segment, epochs, reset_time=True):
     return signal_epoch
 
 
+def epoch_nix(fname):
+    """
+    This function loads a NIX file, extracts the first segment and the first
+    analog signal from that segment, and then epochs the signal based on the
+    event times.
+
+    Parameters
+    ----------
+    fname : str
+        Path to the NIX file.
+
+    Returns
+    -------
+    lfp : 3D array
+        Epochs of the LFP signal with shape (trials x channels x time).
+    """
+    
+    # load nix file
+    segment, _ = load_nix(fname)
+
+    # segment epochs
+    lfp = epoch_neo_segment(segment, segment.epochs[0], reset_time=True)
+
+    return lfp
+
+
 def comp_psd_diff(psd_pre, psd_post):
     """
     Compute the difference of log psd.
