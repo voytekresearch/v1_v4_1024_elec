@@ -1,0 +1,10 @@
+numpy
+scipy
+pandas
+matplotlib
+seaborn
+mne
+neo
+odml
+specparam
+neurodsp
