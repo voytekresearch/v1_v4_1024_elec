@@ -307,13 +307,11 @@ def plot_spectra_2conditions(spectra_a, spectra_b, freq, ax=None, shade_sem=True
     # shade between SEM of spectra for each condition
     if shade_sem:
         for spectra, col in zip([spectra_a, spectra_b], color):
-            lower_limit = np.log10(np.mean(spectra, axis=0) - \
-                                   (np.std(spectra, axis=0)))
-            upper_limit = np.log10(np.mean(spectra, axis=0) + \
-                                   (np.std(spectra, axis=0)))
+            sem = np.std(spectra, axis=0) / np.sqrt(spectra.shape[0])
+            lower_limit = np.log10(np.mean(spectra, axis=0) - sem)
+            upper_limit = np.log10(np.mean(spectra, axis=0) + sem)
             ax.fill_between(np.log10(freq), lower_limit, upper_limit, color=col, 
                             alpha=0.5)
-
 
     # set axes ticks and labels
     ax.set_ylabel(f'power ({y_units})')
