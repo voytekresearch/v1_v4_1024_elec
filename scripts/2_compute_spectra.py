@@ -1,6 +1,12 @@
 
 """
-Compute spectral power of LFP data using the multitaper method.
+This script computes the spectral power of LFP data using the multitaper method.
+The results of scripts/1_epoch_lfp.py are used as input. The results for each
+electrode array are saved as .npz files, with the spectral power saved as a 
+3D array (electrode x freqs x time). The results are then aggregated across
+electrode arrays for each session and saved as a .npz file.
+
+NOTE: This script schould be ran sequentially, after scripts/1_epoch_lfp.py.
 
 """
 
