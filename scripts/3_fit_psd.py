@@ -1,8 +1,12 @@
 """
-Apply Spectral Parametrization (SpecParam) to all sessions. The trial 
+Apply Spectral Parametrization (SpecParam) to all sessions. The output of
+scripts/2_compute_spectra.py is used as input. For each session, the 3D 
 spectrogram is averaged over time for the pre- and post-stimulus periods and 
 then parameterized. Results are aggregated across sessions and the dataframe
 is saved as a CSV file.
+
+NOTE: This script schould be ran sequentially, after scripts/1_epoch_lfp.py and
+scripts/2_compute_spectra.py have been ran.
 
 """
 
