@@ -1,5 +1,8 @@
 """
-compute Spectral Parametrization for all files in a given folder (session) 
+Apply Spectral Parametrization (SpecParam) to all sessions. The trial 
+spectrogram is averaged over time for the pre- and post-stimulus periods and 
+then parameterized. Results are aggregated across sessions and the dataframe
+is saved as a CSV file.
 
 """
 
