@@ -1,8 +1,11 @@
 '''
-Epoch LFP data.
+Epoch LFP data. This script loads the LFP data from the SNR datasets and epochs
+the data based on the segment.epochs attribute. The resulting epochs are 3D
+arrays with shape (trials x channels x time). The epochs are then saved as .npy
+files.
 
-NOTE: this script is written for the RHS dataset; the other datasets have
-multiple lists of epochs within segement.epochs that must be considered.
+NOTE: this script is written for the SNR datasets; the other datasets (RF/RS) 
+have multiple lists of epochs within segement.epochs that must be considered.
 
 '''
 
