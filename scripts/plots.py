@@ -259,7 +259,7 @@ def plot_schematic_var(df, odml_path, var, y_label, dir_figs):
         plt.close('all')
 
 def plot_spectra_2conditions(spectra_a, spectra_b, freq, ax=None, shade_sem=True,
-                             color=['grey','k'], labels=['baseline','encoding'],
+                             color=['k','b'], labels=['baseline','encoding'],
                              y_units='\u03BCV\u00b2/Hz'):
     
     """
@@ -278,7 +278,7 @@ def plot_spectra_2conditions(spectra_a, spectra_b, freq, ax=None, shade_sem=True
     shade_sem : bool, optional
         Whether to shade SEM. The default is True.
     color : list, optional
-        Colors for each condition. The default is ['grey','k'].
+        Colors for each condition. The default is ['k','b'].
     labels : list, optional
         Labels for each condition. The default is ['baseline','encoding'].
 
@@ -288,37 +288,37 @@ def plot_spectra_2conditions(spectra_a, spectra_b, freq, ax=None, shade_sem=True
     """
 
     # imports
-    from fooof.plts import plot_spectrum
+    from specparam.plts import plot_spectra
 
     # check axis
     if ax is None:
-        fig, ax = plt.subplots(1,1, figsize=[6,4])
+        _, ax = plt.subplots(1,1, figsize=[6,4])
 
     # check psds are 2d
     if not (spectra_a.ndim == 2 and spectra_b.ndim == 2):
         raise ValueError('PSDs must be 2d arrays.')
 
     # plot mean spectra for each condition
-    plot_spectrum(freq, np.mean(spectra_a, axis=0), ax=ax, color=color[0])
-    plot_spectrum(freq, np.mean(spectra_b, axis=0), ax=ax, color=color[1])    
+    plot_spectra(freq, np.mean(spectra_a, axis=0), ax=ax, color=color[0],
+                 log_freqs=True, log_powers=True)
+    plot_spectra(freq, np.mean(spectra_b, axis=0), ax=ax, color=color[1],
+                 log_freqs=True, log_powers=True)   
     
     # shade between SEM of spectra for each condition
     if shade_sem:
-        ax.fill_between(freq, np.mean(spectra_a, axis=0) - (np.std(spectra_a, axis=0)/np.sqrt(spectra_a.shape[0])),
-                        np.mean(spectra_a, axis=0) + (np.std(spectra_a, axis=0)/np.sqrt(spectra_a.shape[0])), 
-                        color=color[0], alpha=0.5)
-        ax.fill_between(freq, np.mean(spectra_b, axis=0) - (np.std(spectra_b, axis=0)/np.sqrt(spectra_b.shape[0])),
-                        np.mean(spectra_b, axis=0) + (np.std(spectra_b, axis=0)/np.sqrt(spectra_b.shape[0])),
-                        color=color[1], alpha=0.5)
-    
-    # set to loglog scale
-    ax.set_xscale('log')
-    ax.set_yscale('log')
+        for spectra, col in zip([spectra_a, spectra_b], color):
+            lower_limit = np.log10(np.mean(spectra, axis=0) - \
+                                   (np.std(spectra, axis=0)))
+            upper_limit = np.log10(np.mean(spectra, axis=0) + \
+                                   (np.std(spectra, axis=0)))
+            ax.fill_between(np.log10(freq), lower_limit, upper_limit, color=col, 
+                            alpha=0.5)
+
 
     # set axes ticks and labels
     ax.set_ylabel(f'power ({y_units})')
     ax.set_xlabel('frequency (Hz)')
-    ax.set_xticks([10,100])
+    ax.set_xticks([np.log10(10), np.log10(100)])
     ax.set_xticklabels(["10", "100"])
 
     # add legend
