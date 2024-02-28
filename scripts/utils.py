@@ -147,8 +147,8 @@ def comp_psd_diff(psd_pre, psd_post):
     """
     
     # compute log psd
-    log_psd_pre = np.log(psd_pre)
-    log_psd_post = np.log(psd_post)
+    log_psd_pre = np.log10(psd_pre)
+    log_psd_post = np.log10(psd_post)
     
     # compute difference
     log_psd_diff = log_psd_post - log_psd_pre
