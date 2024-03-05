@@ -348,3 +348,30 @@ def compute_tfr(lfp, fs, freqs, freq_spacing='lin', time_window_length=0.5,
                                 n_jobs=n_jobs, decim=decim, verbose=verbose)
 
     return tfr, freq
+
+
+def crop_tfr(tfr, time, time_range):
+    """
+    Crop time-frequency representation (TFR) to time_range.
+    TFR can be mulitdimensional (time must be last dimension).
+
+    Parameters
+    ----------
+    tfr : array
+        Time-frequency representation of power (spectrogram).
+    time : 1D array
+        Associated time vector (length should be equal to that of
+        the last dimension of tfr).
+    time_range : 1D array
+        Time range to crop (t_start, t_stop).
+
+    Returns
+    -------
+    tfr, time : array, array
+        Cropped TFR and time vector.
+    """
+    
+    tfr = tfr[..., (time>time_range[0]) & (time<time_range[1])]
+    time = time[(time>time_range[0]) & (time<time_range[1])]
+    
+    return tfr, time
