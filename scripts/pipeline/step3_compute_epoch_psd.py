@@ -39,19 +39,26 @@ def main():
         time = data['time']
         freq = data['freq']
 
-        # crop tfr to epochs
-        tfr_pre, _ = crop_tfr(tfr, time, [-DURATION, 0])
-        tfr_post, _ = crop_tfr(tfr, time, [0, DURATION])
-
-        # compute average power spectrum and save
-        psd_pre = np.mean(tfr_pre, axis=-1)
-        psd_post = np.mean(tfr_post, axis=-1)
+        # compute average power spectrum for pre- and post-stimulus epochs
+        psd_pre, psd_post = compute_epoch_psd(tfr, time, duration=DURATION)
 
         # save results
         np.savez(f"{path_out}/{file.replace('.npz', '_pre.npz')}", 
                     spectra=psd_pre, freq=freq)
         np.savez(f"{path_out}/{file.replace('.npz', '_post.npz')}", 
                     spectra=psd_post, freq=freq)
+
+
+def compute_epoch_psd(tfr, time, duration):
+    """
+    Split the TFR into pre- and post-stimulus epochs.
+    
+    """
+    
+    psd_pre = np.mean(crop_tfr(tfr, time, [-duration, 0])[0], axis=-1)
+    psd_post = np.mean(crop_tfr(tfr, time, [0, duration])[0], axis=-1)
+
+    return psd_pre, psd_post
             
 
 if __name__ == "__main__":

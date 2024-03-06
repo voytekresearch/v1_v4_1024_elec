@@ -1,5 +1,8 @@
 """
-This script plots the results of scripts.pipeline.3_compute_spectra.py
+This script plots the results of scripts.pipeline.step2_compute_spectrogram.py.
+So far, this script is written to plot the average power spectrum for each array
+in the dataset. Each figure includes the power spectrum for the pre- and
+post-stimulus epochs.
 
 """
 
@@ -14,7 +17,8 @@ sys.path.append("code")
 from paths import EXTERNAL_PATH
 from info import SESSIONS
 from plots import plot_spectra_2conditions
-from utils import crop_tfr
+sys.path.append("scripts")
+from step3_compute_epoch_psd import compute_epoch_psd
 
 # settings
 plt.style.use('mpl_styles/default.mplstyle')
@@ -50,18 +54,6 @@ def main():
             ax.set_title(f"{session} - {fname.split('_')[1]}")
             fig.savefig(f"{dir_output}/{fname.replace('.npz', '.png')}")
             plt.close()
-
-
-def compute_epoch_psd(tfr, time, duration=0.3):
-    """
-    Split the TFR into pre- and post-stimulus epochs.
-    
-    """
-    
-    psd_pre = np.mean(crop_tfr(tfr, time, [-duration, 0])[0], axis=-1)
-    psd_post = np.mean(crop_tfr(tfr, time, [0, duration])[0], axis=-1)
-
-    return psd_pre, psd_post
 
 
 if __name__ == "__main__":
