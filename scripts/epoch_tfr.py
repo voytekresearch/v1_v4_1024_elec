@@ -27,15 +27,17 @@ def main():
         # create directories
         path_in = f'{EXTERNAL_PATH}/data/lfp/lfp_tfr/{session}'
         path_out = f'{EXTERNAL_PATH}//data/lfp/lfp_tfr_epoch/{session}'
-        if not os.path.exists(path_out):
-            os.makedirs(path_out)
+        path_psd = f'{EXTERNAL_PATH}//data/lfp/lfp_psd'
+        for path in [path_out, path_psd]:
+            if not os.path.exists(path):
+                os.makedirs(path)
         
         # loop over files (arrays; 16 per session)
         files = os.listdir(path_in)
         files = [f for f in files if f.endswith('.npz')]
         for file in files:
+            # load data
             data = np.load(f'{path_in}/{file}')
-        
             tfr = data['tfr']
             time = data['time']
             freq = data['freq']
@@ -50,6 +52,15 @@ def main():
                      tfr=pre_cropped[0], time=pre_cropped[1], freq=freq)
             np.savez(f"{path_out}/{fname_out.replace('XXX', 'post')}", 
                      tfr=post_cropped[0], time=post_cropped[1], freq=freq)
+            
+            # compute average power spectrum and save
+            psd_pre = np.mean(pre_cropped[0], axis=-1)
+            psd_post = np.mean(post_cropped[0], axis=-1)
+            np.savez(f"{path_psd}/{fname_out.replace('XXX', 'pre')}", 
+                     psd=psd_pre, freq=freq)
+            np.savez(f"{path_psd}/{fname_out.replace('XXX', 'post')}",
+                     psd=psd_post, freq=freq)
+            
 
 if __name__ == "__main__":
     main()
