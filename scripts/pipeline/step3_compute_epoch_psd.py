@@ -49,9 +49,9 @@ def main():
 
         # save results
         np.savez(f"{path_out}/{file.replace('.npz', '_pre.npz')}", 
-                    psd=psd_pre, freq=freq)
+                    spectra=psd_pre, freq=freq)
         np.savez(f"{path_out}/{file.replace('.npz', '_post.npz')}", 
-                    psd=psd_post, freq=freq)
+                    spectra=psd_post, freq=freq)
             
 
 if __name__ == "__main__":
