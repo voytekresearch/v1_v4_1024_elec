@@ -1,5 +1,8 @@
 """ Analysis settings"""
 
+# General settings
+EPOCH_DURATION = 0.3 # duration of pre- and post-stimulus analysis epochs (sec)
+
 # Spectral analysis settings
 FREQS = [4, 100, 128] # Frequency vector for spectra (start, stop, n_freqs)
 FREQ_SPACING = 'lin' # Frequency spacing for spectra ('lin' or 'log')

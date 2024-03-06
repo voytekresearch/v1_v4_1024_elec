@@ -12,11 +12,10 @@ import os
 # imports - custom 
 import sys
 sys.path.append("code")
-from utils import crop_tfr
 from paths import EXTERNAL_PATH
+from settings import EPOCH_DURATION
+from utils import crop_tfr
 
-# settings
-DURATION = 0.3 # duration of pre- and post-stimulus epochs (in seconds)
 
 def main():
 
@@ -40,7 +39,7 @@ def main():
         freq = data['freq']
 
         # compute average power spectrum for pre- and post-stimulus epochs
-        psd_pre, psd_post = compute_epoch_psd(tfr, time, duration=DURATION)
+        psd_pre, psd_post = compute_epoch_psd(tfr, time, EPOCH_DURATION)
 
         # save results
         np.savez(f"{path_out}/{file.replace('.npz', '_pre.npz')}", 
