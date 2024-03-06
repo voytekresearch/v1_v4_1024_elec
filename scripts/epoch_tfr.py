@@ -8,10 +8,13 @@ import os
 
 # imports - custom 
 from utils import crop_tfr
-from info import SESSIONS, EPOCH_TIMES
+from info import SESSIONS
 from paths import EXTERNAL_PATH
 
 def main():
+    # set global variable for duration of pre and post stimulus
+    DURATION = [-0.3, 0.3]
+
     for session in SESSIONS:
         # display progress
         print(f"\nAnalyzing session: {session}")
@@ -33,8 +36,8 @@ def main():
             freq = data['freq']
 
             # crop tfr to epochs
-            pre_cropped = crop_tfr(tfr, time, [EPOCH_TIMES[0],0])
-            post_cropped = crop_tfr(tfr, time, [0, EPOCH_TIMES[1]])
+            pre_cropped = crop_tfr(tfr, time, [DURATION[0],0])
+            post_cropped = crop_tfr(tfr, time, [0, DURATION[1]])
 
             # save results
             fname_out = file.replace('.npz', '_XXX.npz')
