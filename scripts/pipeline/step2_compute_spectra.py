@@ -15,6 +15,8 @@ import numpy as np
 import os
 
 # imports - custom
+import sys
+sys.path.append('code')
 from paths import EXTERNAL_PATH
 from info import SESSIONS, FS, EPOCH_TIMES, N_ARRAYS, N_CHANS
 from settings import N_JOBS, FREQS, FREQ_SPACING

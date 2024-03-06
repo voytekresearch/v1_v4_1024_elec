@@ -14,6 +14,8 @@ import numpy as np
 import os
 
 # imports - custom
+import sys
+sys.path.append('code')
 from utils import load_nix, epoch_neo_segment
 from info import SESSIONS
 from paths import EXTERNAL_PATH

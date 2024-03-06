@@ -17,6 +17,8 @@ import pandas as pd
 from specparam import SpectralGroupModel, Bands
 
 # imports - custom
+import sys
+sys.path.append('code')
 from paths import EXTERNAL_PATH
 from info import N_ARRAYS, N_CHANS
 from settings import N_JOBS, BANDS, SPECPARAM_SETTINGS
