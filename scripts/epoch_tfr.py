@@ -1,5 +1,8 @@
 """
-Epoch Cropped Time Frequency Representations (tfr)
+This script computes the average power spectrum for the pre- and post-stimulus 
+epochs. The spectrogram [or time-frequency representations (tfr)] is loaded,
+cropped within the pre- and post-stimulus epochs, and then averaged across time.
+
 """
 
 # imports - general
@@ -7,6 +10,8 @@ import numpy as np
 import os
 
 # imports - custom 
+import sys
+sys.path.append("code")
 from utils import crop_tfr
 from info import SESSIONS
 from paths import EXTERNAL_PATH
@@ -36,13 +41,15 @@ def main():
             freq = data['freq']
 
             # crop tfr to epochs
-            pre_cropped = crop_tfr(tfr, time, [DURATION[0],0])
+            pre_cropped = crop_tfr(tfr, time, [DURATION[0], 0])
             post_cropped = crop_tfr(tfr, time, [0, DURATION[1]])
 
             # save results
             fname_out = file.replace('.npz', '_XXX.npz')
-            np.savez(f"{path_out}/{fname_out.replace('XXX', 'pre')}", tfr=pre_cropped[0], time=pre_cropped[1], freq=freq)
-            np.savez(f"{path_out}/{fname_out.replace('XXX', 'post')}", tfr=post_cropped[0], time=post_cropped[1], freq=freq)
+            np.savez(f"{path_out}/{fname_out.replace('XXX', 'pre')}", 
+                     tfr=pre_cropped[0], time=pre_cropped[1], freq=freq)
+            np.savez(f"{path_out}/{fname_out.replace('XXX', 'post')}", 
+                     tfr=post_cropped[0], time=post_cropped[1], freq=freq)
 
 if __name__ == "__main__":
     main()
