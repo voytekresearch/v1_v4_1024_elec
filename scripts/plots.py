@@ -287,9 +287,6 @@ def plot_spectra_2conditions(spectra_a, spectra_b, freq, ax=None, shade_sem=True
     None.
     """
 
-    # imports
-    from specparam.plts import plot_spectra
-
     # check axis
     if ax is None:
         _, ax = plt.subplots(1,1, figsize=[6,4])
@@ -299,24 +296,24 @@ def plot_spectra_2conditions(spectra_a, spectra_b, freq, ax=None, shade_sem=True
         raise ValueError('PSDs must be 2d arrays.')
 
     # plot mean spectra for each condition
-    plot_spectra(freq, np.mean(spectra_a, axis=0), ax=ax, color=color[0],
-                 log_freqs=True, log_powers=True)
-    plot_spectra(freq, np.mean(spectra_b, axis=0), ax=ax, color=color[1],
-                 log_freqs=True, log_powers=True)   
+    ax.loglog(freq, np.nanmean(spectra_a, axis=0), color=color[0], 
+              label=labels[0])
+    ax.loglog(freq, np.nanmean(spectra_b, axis=0), color=color[1], 
+              label=labels[1]) 
     
     # shade between SEM of spectra for each condition
     if shade_sem:
         for spectra, col in zip([spectra_a, spectra_b], color):
             sem = np.std(spectra, axis=0) / np.sqrt(spectra.shape[0])
-            lower_limit = np.log10(np.mean(spectra, axis=0) - sem)
-            upper_limit = np.log10(np.mean(spectra, axis=0) + sem)
-            ax.fill_between(np.log10(freq), lower_limit, upper_limit, color=col, 
+            lower_limit = np.mean(spectra, axis=0) - sem
+            upper_limit = np.mean(spectra, axis=0) + sem
+            ax.fill_between(freq, lower_limit, upper_limit, color=col, 
                             alpha=0.5)
 
     # set axes ticks and labels
     ax.set_ylabel(f'power ({y_units})')
     ax.set_xlabel('frequency (Hz)')
-    ax.set_xticks([np.log10(10), np.log10(100)])
+    ax.set_xticks([10, 100])
     ax.set_xticklabels(["10", "100"])
 
     # add legend
