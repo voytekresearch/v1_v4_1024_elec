@@ -1,0 +1,7 @@
+pipeline:
+	python scripts/pipeline/step1_epoch_lfp.py
+	python scripts/pipeline/step2_compute_spectrogram.py
+	python scripts/pipeline/step3_compute_epoch_psd.py
+	python scripts/pipeline/step4_fit_psd.py
+
+all: pipeline
