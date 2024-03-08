@@ -1,8 +1,8 @@
 # imports
 import numpy as np
 import sys
-sys.path.append("../")
-from scripts.info import *
+sys.path.append("scripts")
+from info import *
 
 
 def prep_data(df, feature, condition, levels):
