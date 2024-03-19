@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # imports - lab <development>
-from specparam import SpectralTimeModel
+from specparam import SpectralTimeEventModel
 
 # imports - custom
 import sys
@@ -48,8 +48,8 @@ def main():
         print(f"Shape freq:\t{freq.shape}")
 
         # apply SpectralTimeModel
-        spec = tfr[0]
-        stm = SpectralTimeModel(**SPECPARAM_SETTINGS)
+        spec = tfr
+        stm = SpectralTimeEventModel(**SPECPARAM_SETTINGS)
         stm.fit(freq, spec)
         stm.plot(save_fig=True, file_name=f"{session}_spectra.png", file_path=path_out)
 
