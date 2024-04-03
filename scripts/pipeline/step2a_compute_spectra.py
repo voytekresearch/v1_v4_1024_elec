@@ -24,7 +24,7 @@ from settings import N_JOBS
 
 def main():
     # identify/create directories
-    path_out = f'{EXTERNAL_PATH}/data/lfp/lfp_spectra'
+    path_out = f'{EXTERNAL_PATH}/data/lfp/lfp_psd'
     if not os.path.exists(path_out): os.makedirs(path_out)
 
     # loop through sessions of interest
