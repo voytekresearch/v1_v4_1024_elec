@@ -188,7 +188,7 @@ def comp_psd_diff(psd_pre, psd_post):
     return log_psd_diff
 
 
-def subtract_baseline(signal, time, t_baseline):
+def subtract_baseline(signal, time, t_baseline=None):
     """Subtracts the mean of the signal in a given time interval from the signal.
 
     Parameters
@@ -205,6 +205,9 @@ def subtract_baseline(signal, time, t_baseline):
     signal : array
         Signal array with mean of the given time interval subtracted
     """
+
+    if t_baseline is None:
+        t_baseline = [time[0], 0]
 
     baseline = np.logical_and(time>=t_baseline[0], time<=t_baseline[1])
     signal = signal - np.mean(signal[baseline])
