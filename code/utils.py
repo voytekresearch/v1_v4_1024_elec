@@ -7,6 +7,15 @@ Utility functions
 import numpy as np
 
 
+def compute_confidence_interval(data):
+    from scipy import stats
+    mean = np.nanmean(data, axis=0)
+    std = np.nanstd(data, axis=0)
+    ci = stats.norm.interval(0.95, loc=mean, scale=std/np.sqrt(data.shape[0]))
+
+    return ci
+
+
 def hour_min_sec(duration):
     """
     Convert duration in seconds to hours, minutes, and seconds.
