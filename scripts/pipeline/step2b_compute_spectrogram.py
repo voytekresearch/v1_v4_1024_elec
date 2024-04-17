@@ -20,7 +20,10 @@ sys.path.append('code')
 from paths import EXTERNAL_PATH
 from info import SESSIONS, FS, EPOCH_TIMES, N_ARRAYS, N_CHANS
 from settings import N_JOBS, FREQS, FREQ_SPACING
-from utils import compute_tfr
+from tfr_utils import compute_tfr
+
+# settings for multitaper analysis
+MUTLITAPER_PARAMS = {'time_window_length': 0.3, 'freq_bandwidth': 10} 
 
 def main():
     # identify/create directories
@@ -50,7 +53,8 @@ def main():
             
             # compute PSD
             tfr, freq = compute_tfr(lfp, FS, FREQS, freq_spacing=FREQ_SPACING, 
-                                    n_jobs=N_JOBS, output='avg_power')
+                                    n_jobs=N_JOBS, output='avg_power', 
+                                    **MUTLITAPER_PARAMS)
 
             # save results
             fname_out = fname_in.replace('.npy', '.npz')
