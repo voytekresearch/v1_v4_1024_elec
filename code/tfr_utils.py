@@ -7,6 +7,135 @@ Utility functions for TFR analysis
 import numpy as np
 
 
+def plot_evoked_tfr(tfr, freq, time, **kwargs):
+    """
+    Plot evoked time-frequency representation (TFR). At each frequnecy, the
+    power is z-scored and baseline subtracted before plotting.
+    """
+
+    # imports
+    from tfr_utils import zscore_tfr, subtract_baseline
+
+    # z-score and subtract baseline for visualization of evoked power
+    tfr  = zscore_tfr(tfr)
+    tfr = subtract_baseline(tfr, time)
+
+    # plot
+    plot_tfr(time, freq, tfr, norm_type='centered', **kwargs)
+
+
+def plot_tfr(time, freqs, tfr, fname_out=None, title=None,
+             norm_type='log', vmin=None, vmax=None, fig=None, ax=None,
+             cax=None, cbar_label=None, annotate_zero=False, log_yscale=False):
+    """
+    Plot time-frequency representation (TFR)
+
+    Parameters
+    ----------
+    time : 1D array
+        Time vector.
+    freqs : 1D array
+        Frequency vector.
+    tfr : 2D array
+        Time-frequency representation of power (spectrogram).
+    fname_out : str, optional
+        File name to save figure. The default is None.
+    title : str, optional
+        Title of plot. The default is None.
+    norm_type : str, optional
+        Type of normalization for color scale. Options are 'linear', 'log',
+        'centered', and 'two_slope'. The default is 'log'.
+    vmin, vmax : float, optional
+        Minimum/maximum value for color scale. The default is None, which
+        sets the min/max to the min/max of the TFR.
+    fig : matplotlib figure, optional
+        Figure to plot on. The default is None, which creates a new figure.
+    ax : matplotlib axis, optional
+        Axis to plot on. The default is None, which creates a new axis.
+    cax : matplotlib axis, optional
+        Axis to plot colorbar on. The default is None.
+    cbar_label : str, optional
+        Label for colorbar. The default is None.
+    annotate_zero : bool, optional
+        Whether to annotate zero on the time axis. The default is False.
+    log_yscale : bool, optional
+        Whether to use a log scale for the y-axis. The default is False.
+
+    Returns
+    -------
+    None.
+    """
+
+    # imports
+    import matplotlib.pyplot as plt
+    from matplotlib.cm import ScalarMappable
+    from matplotlib.colors import Normalize, LogNorm, CenteredNorm, TwoSlopeNorm
+
+
+    # Define a color map and normalization of values
+    if vmin is None:
+        vmin = np.nanmin(tfr)
+    if vmax is None:
+        vmax = np.nanmax(tfr)
+
+    if norm_type == 'linear':
+        norm = Normalize(vmin=vmin, vmax=vmax)
+        cmap = 'hot'
+    elif norm_type == 'log':
+        norm = LogNorm(vmin=vmin, vmax=vmax)
+        cmap = 'hot'
+    elif norm_type == 'centered':
+        norm = CenteredNorm(vcenter=0)
+        cmap = 'coolwarm'
+    elif norm_type == 'two_slope':
+        norm = TwoSlopeNorm(vcenter=0, vmin=vmin, vmax=vmax)
+        cmap = 'coolwarm'
+    else:
+        print("norm_type must be 'linear', 'log', 'centered', or 'two_slope'")
+    
+    # create figure
+    if (ax is None) & (fig is None):
+        fig, ax = plt.subplots(constrained_layout=True)
+    elif (ax is None) | (fig is None):
+        raise ValueError('Both fig and ax must be provided if one is provided.')
+
+    # plot tfr
+    ax.pcolor(time, freqs, tfr, cmap=cmap, norm=norm)
+
+    # set labels and scale
+    if log_yscale is True:
+        ax.set(yscale='log')
+        ax.set_yticks([10, 100])
+        ax.set_yticklabels(['10','100'])
+
+    # set title
+    if not title is None:
+        ax.set_title(title)
+
+    # label axes
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('Frequency (Hz)')
+
+    # add colorbar
+    if cax is None:
+        cbar = fig.colorbar(ScalarMappable(cmap=cmap, norm=norm), ax=ax)
+    else:
+        cbar = fig.colorbar(ScalarMappable(cmap=cmap, norm=norm), cax=cax)
+    if not cbar_label is None:
+        cbar.set_label(cbar_label)
+
+    # annotate zero
+    if annotate_zero:
+        ax.axvline(0, color='k', linestyle='--', linewidth=2)
+
+    # add grid
+    ax.grid(True, which='major', axis='both', linestyle='--', linewidth=0.8)
+
+    # save fig
+    if not fname_out is None:
+        plt.savefig(fname_out)
+
+
 def compute_tfr(lfp, fs, freqs, freq_spacing='lin', time_window_length=0.5, 
                 freq_bandwidth=4, n_jobs=-1, decim=1, output='power', 
                 verbose=False):
