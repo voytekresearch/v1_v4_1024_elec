@@ -364,7 +364,7 @@ def preprocess_tfr(tfr, time, downsample_n=None, edge=None, average_trials=True,
 
 
 def load_tfr_results(fname, preprocess=True, downsample_n=None, edge=None, 
-                     average_trials=True, z_score=True, subtract_baseline=False,
+                     average_trials=True, z_score=False, subtract_baseline=False,
                      t_baseline=None):
     # load data
     data_in = np.load(fname)
