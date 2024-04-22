@@ -69,7 +69,7 @@ def main():
                                                       tfr.shape[-1])]*N_ARRAYS),
             'chan_idx'  :   np.repeat(np.arange(N_ARRAYS*N_CHANS), n_bins),
             'array'     :   np.repeat(np.arange(N_ARRAYS), N_CHANS*n_bins) + 1})
-        df_sess = pd.concat([df_data, df_stm], axis=0)
+        df_sess = pd.concat([df_data, df_stm], axis=1)
 
         # add df to list
         dfs.append(df_sess)
