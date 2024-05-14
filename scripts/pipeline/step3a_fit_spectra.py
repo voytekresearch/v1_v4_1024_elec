@@ -51,7 +51,7 @@ def main():
 
         # save specparam results object
         fg.save(f"{path_out}/{fname_in.replace('.npz', '')}", save_results=True, 
-                save_settings=True)
+                save_settings=True, save_data=True)
     
         # create dataframe of results
         df_specparam = fg.to_df(Bands(BANDS))
