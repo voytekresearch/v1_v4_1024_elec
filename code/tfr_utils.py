@@ -338,7 +338,7 @@ def downsample_tfr(tfr, time, n):
 
 
 def preprocess_tfr(tfr, time, downsample_n=None, edge=None, average_trials=True, 
-                   z_score=True, subtract_baseline=False, t_baseline=None):
+                   z_score=True, baseline=False, t_baseline=None):
 
     # downsample
     if not downsample_n is None:
@@ -357,7 +357,7 @@ def preprocess_tfr(tfr, time, downsample_n=None, edge=None, average_trials=True,
         tfr = zscore_tfr(tfr)
 
     # subtract basline
-    if subtract_baseline:
+    if baseline:
         tfr = subtract_baseline(tfr, time, t_baseline)
 
     return tfr, time
