@@ -1,0 +1,21 @@
+name: v1v4
+channels:
+  - defaults
+dependencies:
+  - python=3.7
+  - pip
+  - pip:
+    - numpy
+    - scipy
+    - pandas
+    - matplotlib
+    - seaborn
+    - mne
+    - joblib
+    - neo
+    - nixio
+    - odml
+    - neurodsp
+    - specparam
+    - jupyter
+    - ipykernel
