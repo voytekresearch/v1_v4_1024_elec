@@ -14,6 +14,7 @@ import os
 import numpy as np
 import pandas as pd
 from specparam import SpectralGroupModel, Bands
+from specparam.objs import fit_models_3d
 
 # imports - custom
 import sys
@@ -43,15 +44,19 @@ def main():
         # analyze baseline and encoding epochs
         for spectra, epoch in zip([data['spectra_pre'], data['spectra_post']], 
                                   ['pre', 'post']):
-            # average over trials
-            spectra = np.mean(spectra, axis=0)
 
-            # parameterize spectra
+            # parameterize spectra with knee
             fg = SpectralGroupModel(**SPECPARAM_SETTINGS)
-            fg.fit(data['freq'], spectra, n_jobs=N_JOBS)
+            fg.fit_models_3d(fg, data['freq'], spectra, n_jobs=N_JOBS)
+
+            # parameterize spectra without knee
+            fgw = SpectralGroupModel(**SPECPARAM_SETTINGS, aperiodic_mode='fixed')
+            fgw.fit_models_3d(fg, data['freq'], spectra, n_jobs=N_JOBS)
 
             # save specparam results object
             fg.save(f"{path_out}/{fname_in.replace('.npz', '')}", save_results=True, 
+                    save_settings=True, save_data=True)
+            fgw.save(f"{path_out}/{fname_in.replace('.npz', '')}_without", save_results=True, 
                     save_settings=True, save_data=True)
         
             # create dataframe of results
