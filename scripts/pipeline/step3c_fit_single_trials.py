@@ -20,8 +20,12 @@ sys.path.append('code')
 from paths import EXTERNAL_PATH
 from info import SESSIONS, N_ARRAYS, N_CHANS
 from settings import N_JOBS, BANDS
+from time_utils import get_start_time, print_time_elapsed
 
 def main():
+    # time it
+    t_start = get_start_time()
+
     # identify/create directories
     path_in = f'{EXTERNAL_PATH}/data/lfp/lfp_psd'
     path_out = f'{EXTERNAL_PATH}/data/lfp/trial_psd_params'
@@ -33,6 +37,7 @@ def main():
     dfs = []
     for i_session, session in enumerate(SESSIONS):
         # show progress
+        t_start_s = get_start_time()
         print(f'Processing file {i_session+1}/{len(SESSIONS)}: \t{session}')
 
         # load data
@@ -45,6 +50,9 @@ def main():
 
             # parametrize spectra with/without knee
             for mode in ['fixed', 'knee']:
+                # show progress
+                time_start_i = get_start_time()
+                print(f'\tAnalyzing Epoch: {epoch}, Mode: {mode}')
  
                 # create specparam settings according to mode
                 SPECPARAM_SETTINGS = {
@@ -77,10 +85,19 @@ def main():
 
                 # add df to list
                 dfs.append(df_sess)
+
+                # print time elapsed
+                print_time_elapsed(time_start_i, "\t\tcondition complete in:")
+
+        # print time elapsed
+        print_time_elapsed(t_start_s, "\tfile complete in:")
     
     # join results DFs across sessions and save
     dfs = pd.concat(dfs, ignore_index=True)
     dfs.to_csv(fr'{path_results}/trial_psd_params_unbounded.csv')
+
+    # print total time elapsed
+    print_time_elapsed(t_start, "Total time elapsed:")
 
 if __name__ == "__main__":
     main()
