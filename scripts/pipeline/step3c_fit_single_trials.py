@@ -1,8 +1,9 @@
 """
-This script fits the SpectralTimeModel to the LFP restults (results of
+This script fits the SpectralModel to the LFP PSD results (output of
 scripts/pipeline/step2_compute_spectrogram.py)
 
-NOTE: This version modifies _ap_bounds 
+NOTE: This version modifies _ap_bounds to restrict the aperiodic parameter 
+fitting to positive values
 
 """
 
@@ -55,7 +56,7 @@ def main():
                     'verbose'           :   False}      # (default: True)
                 
                 fg = SpectralGroupModel(**SPECPARAM_SETTINGS)
-                fg._ap_bounds((0,0,0), (np.inf, np.inf, np.inf))    # restrict aperiodic parameters (particularly knee) to be positive
+                fg._ap_bounds = ((0,0,0), (np.inf, np.inf, np.inf)) # restrict aperiodic parameters to be positive
                 fgs = fit_models_3d(fg, data['freq'], spectra, n_jobs=N_JOBS)
 
                 # save specparam results object
