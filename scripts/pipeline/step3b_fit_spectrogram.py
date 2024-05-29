@@ -20,7 +20,7 @@ sys.path.append("code")
 from paths import EXTERNAL_PATH
 from info import SESSIONS, N_ARRAYS, N_CHANS
 from settings import SPECPARAM_SETTINGS, BANDS, N_JOBS
-from utils import hour_min_sec
+from time_utils import hour_min_sec
 
 # settings
 plt.style.use('mpl_styles/default.mplstyle')

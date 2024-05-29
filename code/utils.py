@@ -16,28 +16,6 @@ def compute_confidence_interval(data):
     return ci
 
 
-def hour_min_sec(duration):
-    """
-    Convert duration in seconds to hours, minutes, and seconds.
-
-    Parameters
-    ----------
-    duration : float
-        Duration in seconds.
-
-    Returns
-    -------
-    hours, mins, secs : int
-        Duration in hours, minutes, and seconds.
-    """
-
-    hours = int(duration // 3600)
-    mins = int(duration % 3600 // 60)
-    secs = int(duration % 60)
-    
-    return hours, mins, secs
-
-
 def load_nix(fname):
     """
     Loads a NIX file and returns the first segment and the first analog signal 
