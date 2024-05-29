@@ -22,6 +22,9 @@ from info import SESSIONS, N_ARRAYS, N_CHANS
 from settings import N_JOBS, BANDS
 from time_utils import get_start_time, print_time_elapsed
 
+# settings
+BOUND_AP_PARAMS = True # restrict aperiodic parameters to be positive
+
 def main():
     # time it
     t_start = get_start_time()
@@ -64,7 +67,8 @@ def main():
                     'verbose'           :   False}      # (default: True)
                 
                 fg = SpectralGroupModel(**SPECPARAM_SETTINGS)
-                fg._ap_bounds = ((0,0,0), (np.inf, np.inf, np.inf)) # restrict aperiodic parameters to be positive
+                if BOUND_AP_PARAMS:
+                    fg._ap_bounds = ((0,0,0), (np.inf, np.inf, np.inf)) # restrict aperiodic parameters to be positive
                 fgs = fit_models_3d(fg, data['freq'], spectra, n_jobs=N_JOBS)
 
                 # save specparam results object
