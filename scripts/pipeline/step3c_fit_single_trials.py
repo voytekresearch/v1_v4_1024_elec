@@ -18,11 +18,12 @@ from specparam.objs import fit_models_3d
 import sys
 sys.path.append('code')
 from paths import EXTERNAL_PATH
-from info import SESSIONS, N_ARRAYS, N_CHANS
+from info import N_ARRAYS, N_CHANS, TOTAL_CHANS
 from settings import N_JOBS, BANDS
 from time_utils import get_start_time, print_time_elapsed
 
 # settings
+SESSIONS = ['A_SNR_041018', 'L_SNR_250717']
 BOUND_AP_PARAMS = True # restrict aperiodic parameters to be positive
 
 def main():
@@ -31,13 +32,11 @@ def main():
 
     # identify/create directories
     path_in = f'{EXTERNAL_PATH}/data/lfp/lfp_psd'
-    path_out = f'{EXTERNAL_PATH}/data/lfp/trial_psd_params'
-    path_results = f'{EXTERNAL_PATH}/data/results'
+    path_out =  f'{EXTERNAL_PATH}/data/results'
     if not os.path.exists(path_out): os.makedirs(path_out)
-    if not os.path.exists(path_results): os.makedirs(path_results)
         
     # loop through files
-    dfs = []
+    df_list = []
     for i_session, session in enumerate(SESSIONS):
         # show progress
         t_start_s = get_start_time()
@@ -69,36 +68,34 @@ def main():
                 fg = SpectralGroupModel(**SPECPARAM_SETTINGS)
                 if BOUND_AP_PARAMS:
                     fg._ap_bounds = ((0,0,0), (np.inf, np.inf, np.inf)) # restrict aperiodic parameters to be positive
-                fgs = fit_models_3d(fg, data['freq'], spectra, n_jobs=N_JOBS)
-
-                # save specparam results object
-                fgs.save(f"{path_out}/{fname_in.replace('.npz', '')}", save_results=True, 
-                        save_settings=True, save_data=True)
+                fgs = fit_models_3d(fg, data['freq'], spectra[:2], n_jobs=N_JOBS)
         
                 # create dataframe of results
-                df_specparam = fgs.to_df(Bands(BANDS))
+                df_specparam = pd.concat([fg.to_df(Bands(BANDS)) for fg in fgs], ignore_index=True)
+                n_trials = len(fgs)
                 df_data = pd.DataFrame({
-                    'session'   :   np.repeat(session, N_ARRAYS*N_CHANS),
-                    'channel'   :   np.concatenate([np.arange(N_CHANS)] * N_ARRAYS),
-                    'chan_idx'  :   np.arange(N_ARRAYS*N_CHANS),
-                    'array'     :   np.repeat(np.arange(N_ARRAYS), N_CHANS) + 1,
-                    'epoch'     :   np.repeat(epoch, N_ARRAYS*N_CHANS),
-                    'ap_mode'   :   np.repeat(mode, N_ARRAYS*N_CHANS)})
+                    'session'   :   np.repeat(session, N_ARRAYS * N_CHANS * n_trials),
+                    'trial'     :   np.concatenate([np.repeat(np.arange(n_trials), TOTAL_CHANS)]),
+                    'channel'   :   np.concatenate([np.arange(N_CHANS)] * (N_ARRAYS * n_trials)),
+                    'chan_idx'  :   np.concatenate([np.arange(TOTAL_CHANS)] * n_trials),
+                    'array'     :   np.concatenate([np.repeat(np.arange(N_ARRAYS), N_CHANS)] * n_trials) + 1,
+                    'epoch'     :   np.repeat(epoch, N_ARRAYS * N_CHANS * n_trials),
+                    'ap_mode'   :   np.repeat(mode, N_ARRAYS * N_CHANS * n_trials)})
                 
                 df_sess = pd.concat([df_data, df_specparam], axis=1)
 
                 # add df to list
-                dfs.append(df_sess)
+                df_list.append(df_sess)
+
+                # join results DFs across sessions and save
+                dfs = pd.concat(df_list, ignore_index=True)
+                dfs.to_csv(fr'{path_out}/trial_psd_params_unbounded.csv')
 
                 # print time elapsed
                 print_time_elapsed(time_start_i, "\t\tcondition complete in:")
 
         # print time elapsed
         print_time_elapsed(t_start_s, "\tfile complete in:")
-    
-    # join results DFs across sessions and save
-    dfs = pd.concat(dfs, ignore_index=True)
-    dfs.to_csv(fr'{path_results}/trial_psd_params_unbounded.csv')
 
     # print total time elapsed
     print_time_elapsed(t_start, "Total time elapsed:")
