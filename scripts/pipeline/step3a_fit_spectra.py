@@ -14,7 +14,6 @@ import os
 import numpy as np
 import pandas as pd
 from specparam import SpectralGroupModel, Bands
-from specparam.objs import fit_models_3d
 
 # imports - custom
 import sys
@@ -45,19 +44,16 @@ def main():
         for spectra, epoch in zip([data['spectra_pre'], data['spectra_post']], 
                                   ['pre', 'post']):
 
-            # parameterize spectra with knee
-            fg = SpectralGroupModel(**SPECPARAM_SETTINGS)
-            fg.fit_models_3d(fg, data['freq'], spectra, n_jobs=N_JOBS)
+            # average over trials
+            spectra = np.mean(spectra, axis=0)
 
-            # parameterize spectra without knee
-            fgw = SpectralGroupModel(**SPECPARAM_SETTINGS, aperiodic_mode='fixed')
-            fgw.fit_models_3d(fg, data['freq'], spectra, n_jobs=N_JOBS)
+            # parameterize spectra
+            fg = SpectralGroupModel(**SPECPARAM_SETTINGS)
+            fg.fit(data['freq'], spectra, n_jobs=N_JOBS)
 
             # save specparam results object
             fg.save(f"{path_out}/{fname_in.replace('.npz', '')}", save_results=True, 
-                    save_settings=True, save_data=True)
-            fgw.save(f"{path_out}/{fname_in.replace('.npz', '')}_without", save_results=True, 
-                    save_settings=True, save_data=True)
+                        save_settings=True, save_data=True)
         
             # create dataframe of results
             df_specparam = fg.to_df(Bands(BANDS))
@@ -66,7 +62,9 @@ def main():
                 'channel'   :   np.concatenate([np.arange(N_CHANS)] * N_ARRAYS),
                 'chan_idx'  :   np.arange(N_ARRAYS*N_CHANS),
                 'array'     :   np.repeat(np.arange(N_ARRAYS), N_CHANS) + 1,
-                'epoch'     :   np.repeat(epoch, N_ARRAYS*N_CHANS)})
+                'epoch'     :   np.repeat(epoch, N_ARRAYS*N_CHANS),
+                'ap_mode'   :   np.repeat(mode, N_ARRAYS*N_CHANS)})
+                
             df_sess = pd.concat([df_data, df_specparam], axis=1)
 
             # add df to list
