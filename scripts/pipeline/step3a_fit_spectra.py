@@ -62,8 +62,7 @@ def main():
                 'channel'   :   np.concatenate([np.arange(N_CHANS)] * N_ARRAYS),
                 'chan_idx'  :   np.arange(N_ARRAYS*N_CHANS),
                 'array'     :   np.repeat(np.arange(N_ARRAYS), N_CHANS) + 1,
-                'epoch'     :   np.repeat(epoch, N_ARRAYS*N_CHANS),
-                'ap_mode'   :   np.repeat(mode, N_ARRAYS*N_CHANS)})
+                'epoch'     :   np.repeat(epoch, N_ARRAYS*N_CHANS)})
                 
             df_sess = pd.concat([df_data, df_specparam], axis=1)
 
