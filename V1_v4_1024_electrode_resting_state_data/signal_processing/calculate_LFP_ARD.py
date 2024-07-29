@@ -14,15 +14,11 @@ Options:
     --eyesig=FILE Path to the eye signals
     --out=FOLDER    Output folder path.
 """
-from docopt import docopt
 from utils import anasig_from_array, merge_anasiglist, mark_epochs
-import quantities as pq
 import neo
 from neo.io.nixio import NixIO
 import gc
-import warnings
 import scipy
-
 import os
 import glob
 
@@ -61,24 +57,11 @@ if __name__ == '__main__':
             # 1. Get the analogsignal of each index (i.e. electrode)
             for anasig in anasig_from_array(path_ns6, i_array, odmlpath=odmlpath):
 
-                ## 2. Filter the signal between 1Hz and 150Hz
-                #anasig = butter(anasig, lowpass_freq=150.0*pq.Hz)
-                #gc.collect()
-
-                # 3. Downsample signal from 30kHz to 500Hz resolution (factor 60)
+                # Downsample signal from 30kHz to 500Hz resolution (factor 60)
                 anasig = anasig.downsample(60, ftype='fir')
                 gc.collect()
 
-                ## 4. Bandstop filter the 50, 100 and 150 Hz frequencies
-                ## Compensates for artifacts from the European electric grid
-                #for fq in [50, 100, 150]:
-                #    anasig = butter(anasig,
-                #                    highpass_freq=(fq + 2)*pq.Hz,
-                #                    lowpass_freq=(fq - 2)*pq.Hz)
-                #    gc.collect()
-
                 lfp.append(anasig)
-
 
             # Use custom function to merge analogsignals
             lfp = merge_anasiglist(lfp)
