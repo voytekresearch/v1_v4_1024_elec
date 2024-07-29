@@ -11,7 +11,7 @@ from utils import anasig_from_array, merge_anasiglist, mark_epochs
 import neo
 from neo.io.nixio import NixIO
 import gc
-import scipy
+from scipy.io import savemat
 import os
 import glob
 
@@ -79,4 +79,4 @@ if __name__ == '__main__':
 
             # Save to mat
             matdict = {'lfp': lfp.magnitude, **lfp.array_annotations}
-            scipy.io.savemat(path_lfp.replace('nix', 'mat'), matdict)
+            savemat(path_lfp.replace('nix', 'mat'), matdict)
