@@ -19,8 +19,8 @@ from mne.time_frequency import psd_array_multitaper
 import sys
 sys.path.append('code')
 from paths import EXTERNAL_PATH
-from info import SESSIONS, FS
-from settings import N_JOBS
+from info import SESSIONS, FS, IDX_ZERO
+from settings import N_JOBS, EPOCH_DURATION
 
 # settings
 BANDWIDTH = 5.0 # frequency bandwidth of multitaper decomposition
@@ -47,13 +47,19 @@ def main():
             spec_list = []
 
             # loop through files (electrode arrays) for each epoch
-            files_e = [f for f in files if epoch in f]
-            for i_file, fname_in in enumerate(files_e):
+            for i_file, fname_in in enumerate(files):
                 # display progress
-                print(f'\tProcessing file {i_file+1}/{len(files_e)}: \t{fname_in}')
+                print(f'\tProcessing file {i_file+1}/{len(files)}: \t{fname_in}')
 
                 # load data
                 lfp = np.load(f'{path_in}/{fname_in}')
+                
+                # get data for epoch
+                n_samples = int(EPOCH_DURATION * FS)
+                if epoch == 'pre':
+                    lfp = lfp[..., IDX_ZERO-n_samples:IDX_ZERO]
+                else:
+                    lfp = lfp[..., IDX_ZERO:IDX_ZERO+n_samples]
 
                 # compute PSD
                 spectra_i, freq = psd_array_multitaper(lfp, FS, n_jobs=N_JOBS,
