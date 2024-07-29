@@ -4,8 +4,7 @@ Calculate the Local Field Potential (LFP) per channel from the raw
 analog signal.
 
 Usage:
-    calculate_LFP_ARD.py --ns6=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/raw --out=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/LFP_ARD --odml=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/metadata_A_SNR_140819.odml --array=INT
-    calculate_LFP_ARD.py --ns6=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/raw --out=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/LFP_ARD --odml=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/metadata_A_SNR_140819.odml --array=2 --eyesig=FILE
+    python calculate_LFP_ARD.py 
 
 Options:
     -h --help     Show this screen and terminate script.
@@ -28,17 +27,20 @@ import os
 import glob
 
 if __name__ == '__main__':
+    # set external drive path
+    EXTERNAL_PATH = 'E:'
+
     # Get arguments
     vargs = docopt(__doc__)
-    folder_ns6 = vargs['--ns6']
+    folder_ns6 = f"{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/raw" 
     #array_id = vargs['--array']
-    odmlpath = vargs['--odml']
-    folder_out = vargs['--out']
-    try:
-        path_eye = vargs['--eyesig']
-    except KeyError:
-        path_eye = None
-        warnings.warn('No eyesignals found.')
+    odmlpath = f"{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/metadata_A_SNR_140819.odml "
+    folder_out = f"{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/LFP_ARD"
+    # try:
+    #     path_eye = vargs['--eyesig']
+    # except KeyError:
+    #     path_eye = None
+    #     warnings.warn('No eyesignals found.')
 
     # call all .ns6 files in folder
     ns6_files = glob.glob(os.path.join(folder_ns6, '*.ns6'))
@@ -89,7 +91,7 @@ if __name__ == '__main__':
         array_block.segments[0].analogsignals.append(lfp)
 
         # Mark epochs, based on metadata
-        array_block = mark_epochs(array_block, odmlpath, eyepath=path_eye)
+        array_block = mark_epochs(array_block, odmlpath, eyepath=None)
 
         # Save to nix
         outFile = NixIO(path_lfp, mode='ow')
