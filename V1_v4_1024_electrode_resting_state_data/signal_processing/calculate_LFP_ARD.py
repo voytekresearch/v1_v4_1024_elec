@@ -22,7 +22,7 @@ from paths import EXTERNAL_PATH
 from info import SESSIONS, N_ARRAYS
 
 # settings 
-SESSIONS = ['A_SNR_140819','L_SNR_250717']
+SESSIONS = ['A_SNR_140819', 'L_SNR_250717']
 
 
 if __name__ == '__main__':
