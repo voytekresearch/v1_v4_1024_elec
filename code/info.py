@@ -1,7 +1,7 @@
 """ Dataset information """
 
-# Dataset details
-SESSIONS = ['A_SNR_041018','A_SNR_140819','L_SNR_250717']
+# Dataset details -- temporarily removed 'A_SNR_041018'
+SESSIONS = ['A_SNR_140819','L_SNR_250717']
 
 # LFP data details
 FS = 500 # LFP sampling frequency (Hz)

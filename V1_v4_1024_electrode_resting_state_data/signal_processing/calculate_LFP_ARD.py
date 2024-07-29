@@ -21,10 +21,6 @@ sys.path.append('code')
 from paths import EXTERNAL_PATH
 from info import SESSIONS, N_ARRAYS
 
-# settings 
-SESSIONS = ['A_SNR_140819', 'L_SNR_250717']
-
-
 if __name__ == '__main__':
 
     # loop through sessions of interest
@@ -33,7 +29,7 @@ if __name__ == '__main__':
         # set/create directories
         folder_ns6 = f"{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/raw"
         odmlpath = f"{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/metadata_{session}.odml "
-        folder_out = f"{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/LFP_unfiltered"
+        folder_out = f"{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/lfp_unfiltered"
         if not os.path.exists(folder_out): os.makedirs(folder_out)
 
         # call all .ns6 files in folder
