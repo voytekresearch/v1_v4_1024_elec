@@ -22,6 +22,10 @@ from paths import EXTERNAL_PATH
 from info import SESSIONS, FS
 from settings import N_JOBS
 
+# settings
+BANDWIDTH = 5.0 # frequency bandwidth of multitaper decomposition
+
+
 def main():
     # identify/create directories
     path_out = f'{EXTERNAL_PATH}/data/lfp/lfp_psd'
@@ -53,6 +57,7 @@ def main():
 
                 # compute PSD
                 spectra_i, freq = psd_array_multitaper(lfp, FS, n_jobs=N_JOBS,
+                                                       bandwidth=BANDWIDTH,
                                                        verbose=False)
                 spec_list.append(spectra_i)
             
