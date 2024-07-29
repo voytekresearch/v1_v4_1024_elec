@@ -68,7 +68,7 @@ def main():
                 fg = SpectralGroupModel(**SPECPARAM_SETTINGS)
                 if BOUND_AP_PARAMS:
                     fg._ap_bounds = ((0,0,0), (np.inf, np.inf, np.inf)) # restrict aperiodic parameters to be positive
-                fgs = fit_models_3d(fg, data['freq'], spectra[:2], n_jobs=N_JOBS)
+                fgs = fit_models_3d(fg, data['freq'], spectra, n_jobs=N_JOBS)
         
                 # create dataframe of results
                 df_specparam = pd.concat([fg.to_df(Bands(BANDS)) for fg in fgs], ignore_index=True)
