@@ -40,16 +40,9 @@ if __name__ == '__main__':
 
         # Get arguments
         folder_ns6 = f"{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/raw"
-        odmlpath = f"{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/metadata_A_SNR_140819.odml "
+        odmlpath = f"{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/metadata_{session}.odml "
         folder_out = f"{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/LFP_unfiltered"
         if not os.path.exists(folder_out): os.makedirs(folder_out)
-        vargs = docopt(__doc__)
-         #array_id = vargs['--array']
-        # try:
-        #     path_eye = vargs['--eyesig']
-        # except KeyError:
-        #     path_eye = None
-        #     warnings.warn('No eyesignals found.')
 
         # call all .ns6 files in folder
         ns6_files = glob.glob(os.path.join(folder_ns6, '*.ns6'))
