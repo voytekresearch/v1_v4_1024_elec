@@ -4,8 +4,8 @@ Calculate the Local Field Potential (LFP) per channel from the raw
 analog signal.
 
 Usage:
-    calculate_LFP.py --ns6=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/raw --out=FOLDER --odml=FILE --array=INT
-    calculate_LFP.py --ns6=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/raw --out=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/LFP_ARD --odml=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/metadata_A_SNR_140819.odml --array=2 --eyesig=FILE
+    calculate_LFP_ARD.py --ns6=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/raw --out=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/LFP_ARD --odml=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/metadata_A_SNR_140819.odml --array=INT
+    calculate_LFP_ARD.py --ns6=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/raw --out=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/LFP_ARD --odml=E:/V1_v4_1024_electrode_resting_state_data/data/A_SNR_140819/metadata_A_SNR_140819.odml --array=2 --eyesig=FILE
 
 Options:
     -h --help     Show this screen and terminate script.
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     # Get arguments
     vargs = docopt(__doc__)
     folder_ns6 = vargs['--ns6']
-    array_id = vargs['--array']
+    #array_id = vargs['--array']
     odmlpath = vargs['--odml']
     folder_out = vargs['--out']
     try:
@@ -47,43 +47,37 @@ if __name__ == '__main__':
     N_ARRAYS=16
     for i_array in range(1, N_ARRAYS+1):
         print(f"    plotting array: {i_array}/{N_ARRAYS}")
-        idx_nsp = (i_array+1) // 2
 
-        path_lfp = os.path.join(folder_out, os.path.basename(path_ns6).replace('.ns6', '.nix'))
+        idx_nsp = (i_array-1) // 2                                         # retrieve ns6 file per array
+        path_ns6 = ns6_files[idx_nsp]
 
-    # counter for arrays
-    count = 1
-    for path_ns6 in ns6_files:
+        path_lfp = folder_out + f'/NSP{idx_nsp+1}_array{i_array}_LFP.nix'      # define path outh
 
-            path_lfp = os.path.join(folder_out, os.path.basename(path_ns6).replace('.ns6', '.nix'))
+      
+        lfp = []
+        # 1. Get the analogsignal of each index (i.e. electrode)
+        for anasig in anasig_from_array(path_ns6, i_array, odmlpath=odmlpath):
 
-            print(f"    current file: {path_ns6}")
+            ## 2. Filter the signal between 1Hz and 150Hz
+            #anasig = butter(anasig, lowpass_freq=150.0*pq.Hz)
+            #gc.collect()
 
-            lfp = []
-            # 1. Get the analogsignal of each index (i.e. electrode)
-            for anasig in anasig_from_array(path_ns6, array_id, odmlpath=odmlpath):
+            # 3. Downsample signal from 30kHz to 500Hz resolution (factor 60)
+            anasig = anasig.downsample(60, ftype='fir')
+            gc.collect()
 
-                ## 2. Filter the signal between 1Hz and 150Hz
-                #anasig = butter(anasig, lowpass_freq=150.0*pq.Hz)
-                #gc.collect()
+            ## 4. Bandstop filter the 50, 100 and 150 Hz frequencies
+            ## Compensates for artifacts from the European electric grid
+            #for fq in [50, 100, 150]:
+            #    anasig = butter(anasig,
+            #                    highpass_freq=(fq + 2)*pq.Hz,
+            #                    lowpass_freq=(fq - 2)*pq.Hz)
+            #    gc.collect()
 
-                # 3. Downsample signal from 30kHz to 500Hz resolution (factor 60)
-                anasig = anasig.downsample(60, ftype='fir')
-                gc.collect()
-
-                ## 4. Bandstop filter the 50, 100 and 150 Hz frequencies
-                ## Compensates for artifacts from the European electric grid
-                #for fq in [50, 100, 150]:
-                #    anasig = butter(anasig,
-                #                    highpass_freq=(fq + 2)*pq.Hz,
-                #                    lowpass_freq=(fq - 2)*pq.Hz)
-                #    gc.collect()
-
-                lfp.append(anasig)
+            lfp.append(anasig)
 
 
         # Use custom function to merge analogsignals
-        print(f"lfp list content: {lfp.shape}")
         lfp = merge_anasiglist(lfp)
 
         # Create empty neo blocks for new datafiles
