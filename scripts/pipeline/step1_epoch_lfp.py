@@ -20,6 +20,9 @@ from utils import load_nix, epoch_neo_segment
 from info import SESSIONS
 from paths import EXTERNAL_PATH
 
+# settings
+PREPROCESSED = False # if True, use filtered LFP data, preprocessed by Chen et al. 2022
+
 def main():
     # loop over sessions
     for session in SESSIONS:
@@ -27,7 +30,10 @@ def main():
         print(f"\nAnalyzing session: {session}")
 
         # identify/create directories
-        path_in = f'{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/lfp'
+        if PREPROCESSED:
+            path_in = f'{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/lfp'
+        else:
+            path_in = f'{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/lfp_unfiltered'
         path_out = f'{EXTERNAL_PATH}/data/lfp/lfp_epochs/{session}'
         if not os.path.exists(path_out):
             os.makedirs(path_out)
