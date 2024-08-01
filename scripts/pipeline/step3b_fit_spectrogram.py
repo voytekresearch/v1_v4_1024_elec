@@ -8,7 +8,6 @@ scripts/pipeline/step2_compute_spectrogram.py)
 import os
 import numpy as np
 import pandas as pd
-from time import time as timer
 
 # imports - lab <development>
 from specparam import SpectralTimeEventModel, Bands
@@ -19,12 +18,12 @@ sys.path.append("code")
 from paths import EXTERNAL_PATH
 from info import SESSIONS, N_ARRAYS, N_CHANS
 from settings import SPECPARAM_SETTINGS, BANDS, N_JOBS
-from time_utils import hour_min_sec
+from time_utils import get_start_time, print_time_elapsed
 
 
 def main():
     # display progress
-    t_start = timer()
+    t_start = get_start_time()
 
     # identify/create directories
     path_in = f"{EXTERNAL_PATH}/data/lfp/lfp_tfr/sessions"
@@ -38,7 +37,7 @@ def main():
     dfs = []
     for session in SESSIONS:
         # display progress
-        t_start_s = timer()
+        t_start_s = get_start_time()
         print(f"\nAnalyzing session: {session}")
 
         # load data
@@ -72,16 +71,14 @@ def main():
         dfs.append(df_sess)
 
         # display progress
-        hour, min, sec = hour_min_sec(timer() - t_start_s)
-        print(f"\tSession completed in {hour} hour, {min} min, and {sec:0.1f} s")
+        print_time_elapsed(t_start_s, f"Session completed in ")
     
     # join results DFs across sessions and save
     dfs = pd.concat(dfs, ignore_index=True)
     dfs.to_csv(f'{EXTERNAL_PATH}/data/results/lfp_stm_params.csv')
 
     # display progress
-    hour, min, sec = hour_min_sec(timer() - t_start)
-    print(f"\n\nTotal analysis time: {hour} hour, {min} min, and {sec:0.1f} s")
+    print_time_elapsed(t_start, f"\n\nTotal analysis time: ")
 
 
 if __name__ == "__main__":
