@@ -8,7 +8,6 @@ scripts/pipeline/step2_compute_spectrogram.py)
 import os
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from time import time as timer
 
 # imports - lab <development>
@@ -22,8 +21,6 @@ from info import SESSIONS, N_ARRAYS, N_CHANS
 from settings import SPECPARAM_SETTINGS, BANDS, N_JOBS
 from time_utils import hour_min_sec
 
-# settings
-plt.style.use('mpl_styles/default.mplstyle')
 
 def main():
     # display progress
