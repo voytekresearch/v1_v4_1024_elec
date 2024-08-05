@@ -52,7 +52,7 @@ def main():
             fg.fit(data['freq'], spectra, n_jobs=N_JOBS)
 
             # save specparam results object
-            fg.save(f"{path_out}/{fname_in.replace('.npz', '')}", save_results=True, 
+            fg.save(f"{path_out}/{session}_{epoch}", save_results=True, 
                         save_settings=True, save_data=True)
         
             # create dataframe of results
