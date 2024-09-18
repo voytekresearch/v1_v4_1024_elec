@@ -54,8 +54,9 @@ def main():
         fig.savefig(f"{dir_output}/session_average/{session}.png")
 
         # plot difference in spectra
+        fig, ax = plt.subplots(figsize=(6, 5))
         fname_out = f"{dir_output}/session_diff/{session}.png"
-        plot_psd_diff(data['freq'], psd_diff, fname_out=fname_out)
+        plot_psd_diff(data['freq'], psd_diff, ax=ax, fname_out=fname_out)
         plt.close('all')
 
 
