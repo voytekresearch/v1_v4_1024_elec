@@ -44,7 +44,7 @@ def main():
         # average spectra over trials and compute difference
         spectra_pre = np.nanmean(data['spectra_pre'], axis=0)
         spectra_post = np.nanmean(data['spectra_post'], axis=0)
-        psd_diff = spectra_post - spectra_pre
+        psd_diff = np.log10(spectra_post) - np.log10(spectra_pre)
 
         # plot spectra
         fig, ax = plt.subplots(figsize=(6, 4))
