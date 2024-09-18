@@ -17,7 +17,7 @@ rcParams['savefig.dpi'] = 300
 rcParams['figure.facecolor'] = 'w'
 
 def plot_psd_diff(freq, psd_diff, shade_conf=True, plot_each=False,
-                  fname_out=None):
+                  ax=None, fname_out=None):
     """ 
     Plot spectra (or change in spectral power) in semi-log space.
     The mean spectrum is plotted in black, and the individual spectra are plotted in grey.
@@ -35,6 +35,8 @@ def plot_psd_diff(freq, psd_diff, shade_conf=True, plot_each=False,
         True.
     plot_each : bool, optional
         Whether to plot individual spectra. The default is False.
+    ax : matplotlib axis, optional
+        Axis to plot on. The default is None.
     fname_out : str, optional
         Path to save figure to. If None, figure is not saved.
 
@@ -44,8 +46,11 @@ def plot_psd_diff(freq, psd_diff, shade_conf=True, plot_each=False,
     
     """
 
+    # check for (and create) axis
+    if ax is None:
+        _, ax = plt.subplots(1,1, figsize=[10,4])
+
     # plot mean spectra
-    fig, ax = plt.subplots(1, 1, figsize=(10, 5))
     ax.plot(freq, psd_diff.mean(axis=0), color='k', linewidth=3)
 
     # plot individual spectra
