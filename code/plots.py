@@ -6,15 +6,7 @@ Plotting functions
 # imports
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
 
-# Matplotlib params
-rcParams['xtick.labelsize'] = 12
-rcParams['ytick.labelsize'] = 12
-rcParams['axes.labelsize'] = 14
-rcParams['axes.titlesize'] = 16
-rcParams['savefig.dpi'] = 300
-rcParams['figure.facecolor'] = 'w'
 
 def plot_psd_diff(freq, psd_diff, shade_conf=True, plot_each=False,
                   ax=None, fname_out=None):
@@ -232,6 +224,7 @@ def plot_schematic(data, odml_path, label=None, title=None, fname_out=None,
     if not fname_out is None:
         plt.savefig(fname_out, transparent=False)
 
+
 def plot_schematic_var(df, odml_path, var, y_label, dir_figs):
     """
     Plot multiple schematics for a list of variables
@@ -280,6 +273,7 @@ def plot_schematic_var(df, odml_path, var, y_label, dir_figs):
                        fname_out=f"{dir_figs}/{session}_{var}_diff.png");
 
         plt.close('all')
+
 
 def plot_spectra_2conditions(spectra_a, spectra_b, freq, ax=None, shade_sem=True,
                              color=['k','b'], labels=['baseline','encoding'],
