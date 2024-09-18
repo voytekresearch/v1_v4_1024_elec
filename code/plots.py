@@ -16,7 +16,8 @@ rcParams['axes.titlesize'] = 16
 rcParams['savefig.dpi'] = 300
 rcParams['figure.facecolor'] = 'w'
 
-def plot_psd_diff(freq, psd_diff, fname_out=None):
+def plot_psd_diff(freq, psd_diff, shade_conf=True, plot_each=False,
+                  fname_out=None):
     """ 
     Plot spectra (or change in spectral power) in semi-log space.
     The mean spectrum is plotted in black, and the individual spectra are plotted in grey.
@@ -29,6 +30,11 @@ def plot_psd_diff(freq, psd_diff, fname_out=None):
         Frequency values.
     psd_diff : array
         Spectral power values.
+    shade_conf : bool, optional
+        Whether to shade the confidence interval of the spectra. The default is 
+        True.
+    plot_each : bool, optional
+        Whether to plot individual spectra. The default is False.
     fname_out : str, optional
         Path to save figure to. If None, figure is not saved.
 
@@ -38,12 +44,21 @@ def plot_psd_diff(freq, psd_diff, fname_out=None):
     
     """
 
-    # plot psd
+    # plot mean spectra
     fig, ax = plt.subplots(1, 1, figsize=(10, 5))
-    ax.plot(freq, psd_diff.T, color='grey')
-
-    # plot mean
     ax.plot(freq, psd_diff.mean(axis=0), color='k', linewidth=3)
+
+    # plot individual spectra
+    if plot_each:
+        ax.plot(freq, psd_diff.T, color='grey')
+
+    # shade between confidence interval of spectra
+    if shade_conf:
+        conf = np.std(psd_diff, axis=0) #/ np.sqrt(psd_diff.shape[0])
+        lower_limit = np.mean(psd_diff, axis=0) - conf
+        upper_limit = np.mean(psd_diff, axis=0) + conf
+        ax.fill_between(freq, lower_limit, upper_limit, color='k', 
+                        alpha=0.5)
 
     # label
     ax.set_xlabel('Frequency (Hz)')
