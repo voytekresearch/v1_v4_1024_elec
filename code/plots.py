@@ -82,7 +82,7 @@ def plot_psd_diff(freq, psd_diff, shade_conf=True, plot_each=False,
 
 
 def plot_schematic(data, odml_path, label=None, title=None, fname_out=None,
-                   norm_type='linear', vmin=None, vmax=None):
+                   norm_type='linear', vmin=None, vmax=None, ax=None):
     """
     Plot data from all electrodes in a schematic view.
 
@@ -107,6 +107,8 @@ def plot_schematic(data, odml_path, label=None, title=None, fname_out=None,
         Minimum value for colorbar. If None, minimum value of data is used.
     vmax : float, optional
         Maximum value for colorbar. If None, maximum value of data is used.
+    ax : matplotlib axis, optional
+        Axis to plot on. The default is None.
 
     Returns
     -------
@@ -137,7 +139,8 @@ def plot_schematic(data, odml_path, label=None, title=None, fname_out=None,
     dist = float(arrays.properties['ElectrodeSeparation'].values[0])
 
     # Create figure and axes
-    fig, ax = plt.subplots(figsize=(12, 6))
+    if ax is None:
+        _, ax = plt.subplots(figsize=(12, 6))
 
     # Define a color map and normalization of values
     if vmin is None:
