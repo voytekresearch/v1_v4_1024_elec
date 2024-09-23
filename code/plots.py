@@ -183,16 +183,16 @@ def plot_schematic(data, odml_path, label=None, title=None, fname_out=None,
     y = [4500, 2700, 720, -2600]
     fun = interp1d(x, y, kind='cubic')
     samples = np.linspace(max(x), min(x), num=100)
-    plt.plot(samples, fun(samples), '--', c='k', lw=2)
+    ax.plot(samples, fun(samples), '--', c='k', lw=2)
 
     # Insert area labels
-    plt.text(-6000, -1800, 'V4', fontsize=16)
-    plt.text(-3300, -3000, 'V1', fontsize=16)
+    ax.text(-6000, -1800, 'V4', fontsize=16)
+    ax.text(-3300, -3000, 'V1', fontsize=16)
 
     # Formatting of plot
-    plt.axis('equal')
-    plt.axis('off')
-    plt.tight_layout()
+    ax.axis('equal')
+    ax.axis('off')
+    # ax.tight_layout()
     ax.set_ylim(-5400, 6000)
 
     # Colorbar
@@ -220,7 +220,7 @@ def plot_schematic(data, odml_path, label=None, title=None, fname_out=None,
         ax.set_title(title)
 
     # Savefig
-    plt.tight_layout()
+    # plt.tight_layout()
     if not fname_out is None:
         plt.savefig(fname_out, transparent=False)
 
