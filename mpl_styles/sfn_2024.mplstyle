@@ -1,0 +1,26 @@
+# Style for SFN 2024 poster
+
+# Font
+font.family: sans-serif
+font.sans-serif: arial
+
+# Font size
+figure.titlesize: 25
+axes.titlesize:	20
+axes.labelsize:	16
+xtick.labelsize: 16
+ytick.labelsize: 16
+legend.fontsize: 16
+font.size: 16
+
+# Figure appearance
+figure.constrained_layout.use: True
+figure.facecolor: w
+axes.facecolor: w
+
+# Figure output
+savefig.dpi: 600	
+# savefig.format: tif
+# savefig.bbox:	tight
+savefig.pad_inches:	0.2
+
