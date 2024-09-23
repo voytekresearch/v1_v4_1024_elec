@@ -22,14 +22,13 @@ def main():
 
     # loop through sessions and arrays
     for session in SESSIONS:
+        print(f"\nProcessing session {session}...")
+
         for i_array in range(N_ARRAYS):
             # get current filename
             nps_idx = (i_array+2) // 2
             fname_in = f"{EXTERNAL_PATH}/V1_v4_1024_electrode_resting_state_data/data/{session}/MUAe/NSP{nps_idx}_array{i_array+1}_MUAe.nix"
-
-            # display progress
-            print(f"\nProcessing session {session}:")
-            print(f"    current file: {fname_in.split('/')[-1]}")
+            print(f"    {fname_in.split('/')[-1]}")
             
             # initialize data dictionary
             data = {
