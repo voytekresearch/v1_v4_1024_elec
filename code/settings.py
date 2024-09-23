@@ -18,7 +18,7 @@ SPECPARAM_SETTINGS = {
     'verbose'           :   False}      # (default: True)
 
 BANDS = { # oscillation frequency bands of interest
-    'alpha'    :   [8, 16],
-    'beta'     :   [16, 40],
+    'alpha'    :   [8, 13],
+    'beta'     :   [13, 40],
     'gamma'    :   [40, 100]
     } 
