@@ -18,13 +18,13 @@ from specparam.objs import fit_models_3d
 import sys
 sys.path.append('code')
 from paths import EXTERNAL_PATH
-from info import N_ARRAYS, N_CHANS, TOTAL_CHANS
-from settings import N_JOBS, BANDS
+from info import SESSIONS, N_ARRAYS, N_CHANS, TOTAL_CHANS
+from settings import N_JOBS, BANDS, SPECPARAM_SETTINGS
 from time_utils import get_start_time, print_time_elapsed
 
 # settings
-SESSIONS = ['A_SNR_041018', 'L_SNR_250717']
-BOUND_AP_PARAMS = True # restrict aperiodic parameters to be positive
+BOUND_AP_PARAMS = False # restrict aperiodic parameters to be positive
+AP_MODE = ['knee'] #['fixed', 'knee']:
 
 def main():
     # time it
@@ -51,20 +51,13 @@ def main():
                                   ['pre', 'post']):
 
             # parametrize spectra with/without knee
-            for mode in ['fixed', 'knee']:
+            for mode in AP_MODE:
                 # show progress
                 time_start_i = get_start_time()
                 print(f'\tAnalyzing Epoch: {epoch}, Mode: {mode}')
  
-                # create specparam settings according to mode
-                SPECPARAM_SETTINGS = {
-                    'peak_width_limits' :   [2, 12],    # (default: (0.5, 12.0)) should be >= 2*frequency_resolution
-                    'min_peak_height'   :   0.1,        # (default: 0.0)
-                    'max_n_peaks'       :   3,          # (default: inf)
-                    'peak_threshold'    :   2.0,        # (default: 2.0)
-                    'aperiodic_mode'    :   mode,       # (default: 'fixed')
-                    'verbose'           :   False}      # (default: True)
-                
+                # fit specparam model
+                SPECPARAM_SETTINGS['aperiodic_mode'] = mode
                 fg = SpectralGroupModel(**SPECPARAM_SETTINGS)
                 if BOUND_AP_PARAMS:
                     fg._ap_bounds = ((0,0,0), (np.inf, np.inf, np.inf)) # restrict aperiodic parameters to be positive
