@@ -58,8 +58,8 @@ def plot_psd_diff(freq, psd_diff, shade_conf=True, plot_each=False,
                         alpha=0.5)
 
     # label
-    ax.set_xlabel('Frequency (Hz)')
-    ax.set_ylabel('Power (uV^2/Hz)')
+    ax.set_xlabel('frequency (Hz)')
+    ax.set_ylabel('power (uV^2/Hz)')
     ax.set_title(f"Power spectrum difference")
 
     # annotate power=0
