@@ -60,7 +60,7 @@ def main():
                 # store results
                 df = pd.DataFrame(data=data)
                 df['epoch'] = epoch
-                df[f'mua'] = np.mean(mua_epoch)
+                df[f'mua'] = mua_epoch
                 df_list.append(df)
 
     # concatenate results into single dataframe
