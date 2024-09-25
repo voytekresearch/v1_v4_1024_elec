@@ -455,7 +455,7 @@ def plot_event_traces(event_traces, time, annotate_time=0,
 
 
 def plot_regression(x_data, y_data, ax=None, title=None, xlabel=None, 
-                    ylabel=None, fname_out=None, label='', label_offset=0):
+                    ylabel=None, color=None, fname_out=None, label='', label_offset=0):
     """
     Calculate and plot the linear regression for two datasets, with optional labels and file output.
     Parameters
@@ -488,13 +488,19 @@ def plot_regression(x_data, y_data, ax=None, title=None, xlabel=None,
         fig.patch.set_facecolor('white') # set background color to white for text legibility
         
     # plot data
-    ax.scatter(x_data, y_data, alpha=0.1)
+    if color is not None:
+        ax.scatter(x_data, y_data, c=color, alpha=0.1)
+    else:
+        ax.scatter(x_data, y_data, alpha=0.1)
 
     # run regression and plot results
     results = linregress(x_data, y_data)
     t_lin = np.linspace(np.nanmin(x_data), np.nanmax(x_data), 100)
     lin = results.slope * t_lin + results.intercept
-    ax.plot(t_lin, lin, label=label, linewidth=3)
+    if color is not None:
+        ax.plot(t_lin, lin, c=color, label=label, linewidth=3)
+    else:
+        ax.plot(t_lin, lin, label=label, linewidth=3)
 
     # add regression results text
     if results.pvalue < 0.001:
