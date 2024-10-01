@@ -517,11 +517,11 @@ def plot_regression(x_data, y_data, ax=None, title=None, xlabel=None,
 
     # label figure
     if title is not None:
-        plt.title(title)
+        ax.set_title(title)
     if xlabel is not None:
-        plt.xlabel(xlabel)
+        ax.set_xlabel(xlabel)
     if ylabel is not None:
-        plt.ylabel(ylabel)
+        ax.set_ylabel(ylabel)
         
     # save/show figure
     if not fname_out is None:
